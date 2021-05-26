@@ -5,6 +5,7 @@
 # dotnet generated
 /auth-microservice/bin/
 /auth-microservice/obj/
+/auth-microservice/Migrations/
 
 # System Files
 .DS_Store
