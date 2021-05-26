@@ -1,0 +1,11 @@
+# angular generated
+/client/dist/
+/client/node_modules/
+
+# dotnet generated
+/auth-microservice/bin/
+/auth-microservice/obj/
+
+# System Files
+.DS_Store
+Thumbs.db
