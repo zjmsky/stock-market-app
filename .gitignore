@@ -1,12 +1,12 @@
 # angular generated
-/client/dist/
-/client/node_modules/
+/StockMarket.WebClient/dist/
+/StockMarket.WebClient/node_modules/
 
 # dotnet generated
-/auth-microservice/bin/
-/auth-microservice/obj/
-/auth-microservice/Migrations/
+/StockMarket.*.Api/bin/
+/StockMarket.*.Api/obj/
+/StockMarket.*.Api/Migrations/
 
-# System Files
+# system files
 .DS_Store
 Thumbs.db
