@@ -7,6 +7,9 @@
 /StockMarket.*.Api/obj/
 /StockMarket.*.Api/Migrations/
 
+# editor files
+/**/.vscode/
+
 # system files
 .DS_Store
 Thumbs.db
