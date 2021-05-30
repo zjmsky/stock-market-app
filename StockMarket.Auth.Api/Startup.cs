@@ -1,5 +1,9 @@
+using System;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,8 +29,31 @@ namespace StockMarket.Auth.Api
             services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
 
             services.AddSingleton<AppDbContext>();
-            
+
             services.AddScoped<AuthProvider>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                var secretKey = Configuration.GetSection("Auth").GetValue<string>("SecretKey");
+                var secretKeyBytes = Encoding.ASCII.GetBytes(secretKey);
+                var signingKey = new SymmetricSecurityKey(secretKeyBytes);
+                var tokenParams = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = signingKey,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = tokenParams;
+            });
 
             services.AddControllers();
 
@@ -45,6 +72,8 @@ namespace StockMarket.Auth.Api
             }
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

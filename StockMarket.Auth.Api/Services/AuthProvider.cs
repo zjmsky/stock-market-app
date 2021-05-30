@@ -29,7 +29,7 @@ namespace StockMarket.Auth.Api.Services
         public async Task<bool> Signup(string username, string password, string email)
         {
             // construct general user object
-            var user = new User()
+            var user = new User
             {
                 Username = username,
                 Password = password,

@@ -33,12 +33,12 @@ namespace StockMarket.Auth.Api.Data
             var indexBuilder = Builders<Entities.User>.IndexKeys;
 
             var nameIndexKey = indexBuilder.Ascending(e => e.Username);
-            var nameIndexOpts = new CreateIndexOptions() { Unique = true };
+            var nameIndexOpts = new CreateIndexOptions { Unique = true };
             var nameIndexModel = new CreateIndexModel<Entities.User>(nameIndexKey, nameIndexOpts);
             collection.Indexes.CreateOne(nameIndexModel);
 
             var emailIndexKey = indexBuilder.Ascending(e => e.Email);
-            var emailIndexOpts = new CreateIndexOptions() { Unique = true };
+            var emailIndexOpts = new CreateIndexOptions { Unique = true };
             var emailIndexModel = new CreateIndexModel<Entities.User>(emailIndexKey, emailIndexOpts);
             collection.Indexes.CreateOne(emailIndexModel);
         }
