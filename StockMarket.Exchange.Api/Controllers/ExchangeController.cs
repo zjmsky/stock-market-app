@@ -20,36 +20,45 @@ namespace StockMarket.Exchange.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] Models.Exchange exchange)
+        public async Task<ActionResult> Post([FromBody] Entities.Exchange exchange)
         {
-            try
-            {
-                await _repo.InsertOneAsync(exchange);
-                return Ok(new { ok = true, error = "" });
-            }
-            catch (ValidationException ex)
-            {
-                var fieldName = Regex.Replace(ex.Message, "([A-Z])", " $1");
-                var error = $"invalid {fieldName.Trim().ToLower()}";
-                return BadRequest(new { ok = false, error = error });
-            }
-            catch (MongoWriteException)
-            {
-                return BadRequest(new { ok = false, error = "duplicate record" });
-            }
+            var success = await _repo.InsertOne(exchange);
+            var payload = new { success };
+            return success ? Ok(payload) : BadRequest(payload);
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<ActionResult> Put([FromBody] Entities.Exchange exchange)
+        {
+            var success = await _repo.ReplaceOne(exchange);
+            var payload = new { success };
+            return success ? Ok(payload) : BadRequest(payload);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult> Delete(string id)
+        {
+            var success = await _repo.DeleteOne(id);
+            var payload = new { success };
+            return success ? Ok(payload) : BadRequest(payload);
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Models.Exchange>>> Get()
+        public async Task<ActionResult> Get([FromQuery] int page, [FromQuery] int count)
         {
-            return Ok(await _repo.ListPageAsync());
+            var exchangeList = await _repo.ListPage(page, count);
+            var payload = new { page, count = exchangeList.Count, exchanges = exchangeList };
+            return Ok(payload);
         }
 
         [HttpGet]
-        [Route(":{code}")]
-        public async Task<ActionResult> Get(string code)
+        [Route("{id}")]
+        public async Task<ActionResult> Get(string id)
         {
-            return Ok(await _repo.FindOneAsync(x => x.CountryCode == code));
+            var exchange = await _repo.FindOneById(id);
+            return exchange != null ? Ok(exchange) : NotFound(null);
         }
     }
 }

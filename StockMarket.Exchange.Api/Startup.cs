@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using StockMarket.Exchange.Api.Data;
+using StockMarket.Exchange.Api.Models;
 using StockMarket.Exchange.Api.Services;
 
 namespace StockMarket.Exchange.Api
@@ -20,9 +20,9 @@ namespace StockMarket.Exchange.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<AppDbContext>(x =>
-                new AppDbContext(Configuration.GetSection("Database")));
+            services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
 
+            services.AddSingleton<DatabaseContext>();
             services.AddSingleton<ExchangeRepo>();
 
             services.AddControllers();
@@ -41,9 +41,7 @@ namespace StockMarket.Exchange.Api
             }
 
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
