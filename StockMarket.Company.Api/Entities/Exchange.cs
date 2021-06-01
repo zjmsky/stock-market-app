@@ -9,12 +9,6 @@ namespace StockMarket.Company.Api.Entities
     {
         public ObjectId Id { get; set; }
         public string ExchangeCode { get; set; }
-
-        [BsonConstructor]
-        public Exchange(string code)
-        {
-            ExchangeCode = code;
-        }
     }
 
     public static class ExchangeConstraintBuilder

@@ -11,12 +11,12 @@ namespace StockMarket.Company.Api
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -26,6 +26,7 @@ namespace StockMarket.Company.Api
 
             services.AddSingleton<DatabaseContext>();
             services.AddSingleton<EventBus>();
+            services.AddSingleton<ExchangeSync>();
             services.AddSingleton<SectorSync>();
             services.AddScoped<CompanyRepo>();
 
