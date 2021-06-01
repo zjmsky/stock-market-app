@@ -9,12 +9,6 @@ namespace StockMarket.Company.Api.Entities
     {
         public ObjectId Id { get; set; }
         public string SectorCode { get; set; }
-
-        [BsonConstructor]
-        public Sector(string code)
-        {
-            SectorCode = code;
-        }
     }
 
     public static class SectorConstraintBuilder

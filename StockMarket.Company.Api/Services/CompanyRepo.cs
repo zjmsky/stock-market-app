@@ -1,19 +1,20 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Bson;
-using StockMarket.Company.Api.Data;
+using StockMarket.Company.Api.Models;
 
 namespace StockMarket.Company.Api.Services
 {
     public class CompanyRepo
     {
-        private readonly AppDbContext _context;
+        private readonly DatabaseContext _context;
+        private readonly EventBus _events;
 
-        public CompanyRepo(AppDbContext context)
+        public CompanyRepo(DatabaseContext context, EventBus events)
         {
             _context = context;
+            _events = events;
         }
 
         public async Task<bool> InsertOne(Entities.Company company)

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using StockMarket.Company.Api.Data;
 using StockMarket.Company.Api.Models;
 using StockMarket.Company.Api.Services;
 
@@ -23,9 +22,11 @@ namespace StockMarket.Company.Api
         {
             services.AddOptions<AuthConfig>().Bind(Configuration.GetSection("Auth"));
             services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
+            services.AddOptions<EventBusConfig>().Bind(Configuration.GetSection("EventBus"));
 
-            services.AddSingleton<AppDbContext>();
-
+            services.AddSingleton<DatabaseContext>();
+            services.AddSingleton<EventBus>();
+            services.AddSingleton<SectorSync>();
             services.AddScoped<CompanyRepo>();
 
             services.AddControllers();
