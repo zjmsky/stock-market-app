@@ -21,9 +21,11 @@ namespace StockMarket.Exchange.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
+            services.AddOptions<EventBusConfig>().Bind(Configuration.GetSection("EventBus"));
 
             services.AddSingleton<DatabaseContext>();
-            services.AddSingleton<ExchangeRepo>();
+            services.AddSingleton<EventBus>();
+            services.AddScoped<ExchangeRepo>();
 
             services.AddControllers();
 
