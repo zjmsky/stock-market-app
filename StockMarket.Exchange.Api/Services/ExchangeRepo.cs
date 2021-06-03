@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using MongoDB.Bson;
 using StockMarket.Exchange.Api.Models;
 
 namespace StockMarket.Exchange.Api.Services
@@ -17,63 +16,48 @@ namespace StockMarket.Exchange.Api.Services
             _events = events;
         }
 
-        public async Task<bool> InsertOne(Entities.Exchange exchange)
+        public async Task<bool> InsertOrReplaceOne(Entities.Exchange exchange)
         {
             // validate exchange model
             var validationErrors = exchange.Validate();
             if (validationErrors.Count > 0) return false;
+    
+            // check if entry exists already
+            var exchangeExists = await _context.Exchange
+                .Find(e => e.ExchangeCode == exchange.ExchangeCode)
+                .AnyAsync();
 
-            // try inserting into database
-            // this fails if uniqueness is violated
-            exchange.Id = ObjectId.Empty;
-            try { await _context.Exchange.InsertOneAsync(exchange); }
-            catch (MongoWriteException) { return false; }
-
-            // broadcast exchange created event
-            var createdEvent = new ExchangeCreatedEvent
+            if (!exchangeExists)
             {
-                Id = exchange.Id.ToString(),
-                ExchangeCode = exchange.ExchangeCode,
-                Name = exchange.Name
-            };
+                // try inserting exchange model
+                // this fails if any constraint is violated
+                try { await _context.Exchange.InsertOneAsync(exchange); }
+                catch (MongoWriteException) { return false; }
+            }
+            else
+            {
+                // try replacing exchange model
+                // this fails if any constraint is violated
+                var code = exchange.ExchangeCode;
+                try { await _context.Exchange.ReplaceOneAsync(e => e.ExchangeCode == code, exchange); }
+                catch (MongoWriteException) { return false; }
+            }
+
+            // broadcast created event
+            var createdEvent = new ExchangeCreatedIntegrationEvent(exchange);
             await _events.Publish<IExchangeIntegrationEvent>(createdEvent);
 
             return true;
         }
 
-        public async Task<bool> ReplaceOne(Entities.Exchange exchange)
-        {
-            // validate exchange model
-            var validationErrors = exchange.Validate();
-            if (validationErrors.Count > 0)
-                return false;
-
-            // try inserting into database
-            // this fails if uniqueness is violated
-            try { await _context.Exchange.ReplaceOneAsync(e => e.Id == exchange.Id, exchange); }
-            catch (MongoWriteException) { return false; }
-
-            // broadcast exchange created event
-            var createdEvent = new ExchangeCreatedEvent
-            {
-                Id = exchange.Id.ToString(),
-                ExchangeCode = exchange.ExchangeCode,
-                Name = exchange.Name
-            };
-            await _events.Publish<IExchangeIntegrationEvent>(createdEvent);
-
-            return true;
-        }
-
-        public async Task<bool> DeleteOne(string id)
+        public async Task<bool> DeleteOne(string code)
         {
             // delete exchange from database
-            var exchangeId = new ObjectId(id);
-            var dbResult = await _context.Exchange.DeleteOneAsync(e => e.Id == exchangeId);
+            var dbResult = await _context.Exchange.DeleteOneAsync(e => e.ExchangeCode == code);
             if (dbResult.DeletedCount == 0) return false;
 
             // broadcast exchange deleted event
-            var deletedEvent = new ExchangeDeletedEvent { Id = id };
+            var deletedEvent = new ExchangeDeletedIntegrationEvent(code);
             await _events.Publish<IExchangeIntegrationEvent>(deletedEvent);
 
             return true;
@@ -86,10 +70,9 @@ namespace StockMarket.Exchange.Api.Services
             return dbExchangeList;
         }
 
-        public async Task<Entities.Exchange> FindOneById(string id)
+        public async Task<Entities.Exchange> FindOneByCode(string code)
         {
-            var exchangeId = new ObjectId(id);
-            var dbExchange = await _context.Exchange.Find(e => e.Id == exchangeId).FirstOrDefaultAsync();
+            var dbExchange = await _context.Exchange.Find(e => e.ExchangeCode == code).FirstOrDefaultAsync();
             return dbExchange;
         }
     }

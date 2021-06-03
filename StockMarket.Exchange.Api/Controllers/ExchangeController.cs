@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 using StockMarket.Exchange.Api.Services;
 
 namespace StockMarket.Exchange.Api.Controllers
@@ -19,45 +16,40 @@ namespace StockMarket.Exchange.Api.Controllers
             _repo = repo;
         }
 
-        [HttpPost]
-        public async Task<ActionResult> Post([FromBody] Entities.Exchange exchange)
-        {
-            var success = await _repo.InsertOne(exchange);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
-        }
-
         [HttpPut]
-        [Route("{id}")]
-        public async Task<ActionResult> Put([FromBody] Entities.Exchange exchange)
+        [Route("{code}")]
+        public async Task<ActionResult> Put(string code, [FromBody] Entities.Exchange exchange)
         {
-            var success = await _repo.ReplaceOne(exchange);
+            exchange.ExchangeCode = code.ToUpper(); // just to be sure
+            var success = await _repo.InsertOrReplaceOne(exchange);
             var payload = new { success };
             return success ? Ok(payload) : BadRequest(payload);
         }
 
         [HttpDelete]
-        [Route("{id}")]
-        public async Task<ActionResult> Delete(string id)
+        [Route("{code}")]
+        public async Task<ActionResult> Delete(string code)
         {
-            var success = await _repo.DeleteOne(id);
+            var success = await _repo.DeleteOne(code.ToUpper());
             var payload = new { success };
             return success ? Ok(payload) : BadRequest(payload);
         }
 
         [HttpGet]
-        public async Task<ActionResult> Get([FromQuery] int page, [FromQuery] int count)
+        public async Task<ActionResult> Get([FromQuery] int page = 1, [FromQuery] int count = 10)
         {
+            page = Math.Max(page, 1);
+            count = Math.Clamp(count, 1, 25);
             var exchangeList = await _repo.ListPage(page, count);
             var payload = new { page, count = exchangeList.Count, exchanges = exchangeList };
             return Ok(payload);
         }
 
         [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult> Get(string id)
+        [Route("{code}")]
+        public async Task<ActionResult> Get(string code)
         {
-            var exchange = await _repo.FindOneById(id);
+            var exchange = await _repo.FindOneByCode(code.ToUpper());
             return exchange != null ? Ok(exchange) : NotFound(null);
         }
     }

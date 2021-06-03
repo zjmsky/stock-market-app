@@ -5,18 +5,28 @@ namespace StockMarket.Exchange.Api.Models
     [Queue("ExchangeIntegrationEvents")]
     public interface IExchangeIntegrationEvent
     {
-        string Id { get; set; }
+        string ExchangeCode { get; set; }
     }
 
-    public class ExchangeCreatedEvent : IExchangeIntegrationEvent
+    public class ExchangeCreatedIntegrationEvent : IExchangeIntegrationEvent
     {
-        public string Id { get; set; }
         public string ExchangeCode { get; set; }
         public string Name { get; set; }
+
+        public ExchangeCreatedIntegrationEvent(Entities.Exchange exchange)
+        {
+            ExchangeCode = exchange.ExchangeCode;
+            Name = exchange.Name;
+        }
     }
 
-    public class ExchangeDeletedEvent : IExchangeIntegrationEvent
+    public class ExchangeDeletedIntegrationEvent : IExchangeIntegrationEvent
     {
-        public string Id { get; set; }
+        public string ExchangeCode { get; set; }
+
+        public ExchangeDeletedIntegrationEvent(string code)
+        {
+            ExchangeCode = code;
+        }
     }
 }

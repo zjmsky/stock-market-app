@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Text.Json.Serialization;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -20,6 +21,7 @@ namespace StockMarket.Exchange.Api.Entities
     [BsonIgnoreExtraElements]
     public class Exchange
     {
+        [JsonIgnore]
         public ObjectId Id { get; set; }
 
         public string ExchangeCode { get; set; }
@@ -33,10 +35,10 @@ namespace StockMarket.Exchange.Api.Entities
         {
             var result = new Dictionary<string, string>();
 
-            var exchCodeIsValid = Regex.IsMatch(ExchangeCode, @"^[a-z]{2}$");
+            var exchCodeIsValid = Regex.IsMatch(ExchangeCode, @"^[A-Z]{2}$");
             if (!exchCodeIsValid) result.Add("exchangeCode", "invalid exchange code");
 
-            var countryCodeIsValid = Regex.IsMatch(CountryCode, @"^[a-z]{2}$");
+            var countryCodeIsValid = Regex.IsMatch(CountryCode, @"^[A-Z]{2}$");
             if (!countryCodeIsValid) result.Add("countryCode", "invalid country code");
 
             var emailExists = Address.Email != string.Empty;
