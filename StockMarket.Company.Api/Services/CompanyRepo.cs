@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Bson;
-using StockMarket.Company.Api.Models;
 
 namespace StockMarket.Company.Api.Services
 {

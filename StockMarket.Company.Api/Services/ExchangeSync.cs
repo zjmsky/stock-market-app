@@ -17,8 +17,8 @@ namespace StockMarket.Company.Api.Services
 
         private async Task OnIntegrationEvent(IExchangeIntegrationEvent integrationEvent)
         {
-            var createdEvent = integrationEvent as ExchangeCreatedEvent;
-            var deletedEvent = integrationEvent as ExchangeDeletedEvent;
+            var createdEvent = integrationEvent as ExchangeCreatedIntegrationEvent;
+            var deletedEvent = integrationEvent as ExchangeDeletedIntegrationEvent;
 
             if (createdEvent != null)
                 await OnCreatedEvent(createdEvent);
@@ -26,25 +26,22 @@ namespace StockMarket.Company.Api.Services
                 await OnDeletedEvent(deletedEvent);
         }
 
-        private async Task OnCreatedEvent(ExchangeCreatedEvent createdEvent)
+        private async Task OnCreatedEvent(ExchangeCreatedIntegrationEvent createdEvent)
         {
-            var exchange = new Entities.Exchange
-            {
-                Id = new ObjectId(createdEvent.Id),
-                ExchangeCode = createdEvent.ExchangeCode,
-            };
-
-            var exists = await _context.Exchanges.Find(e => e.Id == exchange.Id).AnyAsync();
+            var exchangeCode = createdEvent.ExchangeCode;
+            var exchange = new Entities.Exchange(exchangeCode);
+            var exists = await _context.Exchanges.Find(e => e.ExchangeCode == exchangeCode).AnyAsync();
+            
             if (!exists)
                 await _context.Exchanges.InsertOneAsync(exchange);
             else
-                await _context.Exchanges.ReplaceOneAsync(e => e.Id == exchange.Id, exchange);
+                await _context.Exchanges.ReplaceOneAsync(e => e.ExchangeCode == exchangeCode, exchange);
         }
 
-        private async Task OnDeletedEvent(ExchangeDeletedEvent deletedEvent)
+        private async Task OnDeletedEvent(ExchangeDeletedIntegrationEvent deletedEvent)
         {
-            var exchangeId = new ObjectId(deletedEvent.Id);
-            await _context.Exchanges.DeleteOneAsync(e => e.Id == exchangeId);
+            var exchangeCode = deletedEvent.ExchangeCode;
+            await _context.Exchanges.DeleteOneAsync(e => e.ExchangeCode == exchangeCode);
         }
     }
 }
