@@ -5,4 +5,9 @@ namespace StockMarket.Sector.Api.Models
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }
     }
+
+    public class EventBusConfig
+    {
+        public string ConnectionString { get; set; }
+    }
 }

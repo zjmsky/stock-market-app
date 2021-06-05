@@ -21,8 +21,10 @@ namespace StockMarket.Sector.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
+            services.AddOptions<EventBusConfig>().Bind(Configuration.GetSection("EventBus"));
 
             services.AddSingleton<DatabaseContext>();
+            services.AddSingleton<EventBus>();
             services.AddScoped<SectorRepo>();
 
             services.AddControllers();

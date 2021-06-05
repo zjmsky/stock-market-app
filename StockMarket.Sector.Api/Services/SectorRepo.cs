@@ -1,16 +1,19 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using StockMarket.Sector.Api.Models;
 
 namespace StockMarket.Sector.Api.Services
 {
     public class SectorRepo
     {
         private readonly DatabaseContext _context;
+        private readonly EventBus _events;
 
-        public SectorRepo(DatabaseContext context)
+        public SectorRepo(DatabaseContext context, EventBus events)
         {
             _context = context;
+            _events = events;
         }
 
         public async Task<bool> InsertOrReplaceOne(Entities.Sector sector)
@@ -40,6 +43,10 @@ namespace StockMarket.Sector.Api.Services
                 catch (MongoWriteException) { return false; }
             }
 
+            // broadcast sector created event
+            var createdEvent = new SectorCreatedIntegrationEvent(sector);
+            await _events.Publish<ISectorIntegrationEvent>(createdEvent);
+
             return true;
         }
 
@@ -48,6 +55,10 @@ namespace StockMarket.Sector.Api.Services
             // delete sector from database
             var dbResult = await _context.Sector.DeleteOneAsync(e => e.SectorCode == code);
             if (dbResult.DeletedCount == 0) return false;
+
+            // broadcast sector deleted event
+            var deletedEvent = new SectorDeletedIntegrationEvent(code);
+            await _events.Publish<ISectorIntegrationEvent>(deletedEvent);
 
             return true;
         }
