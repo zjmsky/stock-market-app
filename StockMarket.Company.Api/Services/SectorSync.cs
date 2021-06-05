@@ -28,23 +28,20 @@ namespace StockMarket.Company.Api.Services
 
         private async Task OnCreatedEvent(SectorCreatedEvent createdEvent)
         {
-            var sector = new Entities.Sector
-            {
-                Id = new ObjectId(createdEvent.Id),
-                SectorCode = createdEvent.SectorCode,
-            };
-
-            var exists = await _context.Sectors.Find(s => s.Id == sector.Id).AnyAsync();
+            var sectorCode = createdEvent.SectorCode;
+            var sector = new Entities.Sector(sectorCode);
+            var exists = await _context.Sectors.Find(s => s.SectorCode == sectorCode).AnyAsync();
+           
             if (!exists)
                 await _context.Sectors.InsertOneAsync(sector);
             else
-                await _context.Sectors.ReplaceOneAsync(s => s.Id == sector.Id, sector);
+                await _context.Sectors.ReplaceOneAsync(s => s.SectorCode == sectorCode, sector);
         }
 
         private async Task OnDeletedEvent(SectorDeletedEvent deletedEvent)
         {
-            var sectorId = new ObjectId(deletedEvent.Id);
-            await _context.Sectors.DeleteOneAsync(s => s.Id == sectorId);
+            var sectorCode = deletedEvent.SectorCode;
+            await _context.Sectors.DeleteOneAsync(s => s.SectorCode == sectorCode);
         }
     }
 }
