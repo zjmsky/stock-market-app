@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using MongoDB.Bson;
 using StockMarket.Company.Api.Models;
 
 namespace StockMarket.Company.Api.Services
@@ -28,20 +27,19 @@ namespace StockMarket.Company.Api.Services
 
         private async Task OnCreatedEvent(ExchangeCreatedIntegrationEvent createdEvent)
         {
-            var exchangeCode = createdEvent.ExchangeCode;
-            var exchange = new Entities.Exchange(exchangeCode);
-            var exists = await _context.Exchanges.Find(e => e.ExchangeCode == exchangeCode).AnyAsync();
+            var exchange = createdEvent.IntoEntity();
+            var exists = await _context.Exchanges.Find(e => e.Id == exchange.Id).AnyAsync();
             
             if (!exists)
                 await _context.Exchanges.InsertOneAsync(exchange);
             else
-                await _context.Exchanges.ReplaceOneAsync(e => e.ExchangeCode == exchangeCode, exchange);
+                await _context.Exchanges.ReplaceOneAsync(e => e.Id == exchange.Id, exchange);
         }
 
         private async Task OnDeletedEvent(ExchangeDeletedIntegrationEvent deletedEvent)
         {
-            var exchangeCode = deletedEvent.ExchangeCode;
-            await _context.Exchanges.DeleteOneAsync(e => e.ExchangeCode == exchangeCode);
+            var exchangeId = deletedEvent.IntoId();
+            await _context.Exchanges.DeleteOneAsync(e => e.Id == exchangeId);
         }
     }
 }

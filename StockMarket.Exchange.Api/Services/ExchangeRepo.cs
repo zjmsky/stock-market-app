@@ -44,7 +44,7 @@ namespace StockMarket.Exchange.Api.Services
             }
 
             // broadcast created event
-            var createdEvent = new ExchangeCreatedIntegrationEvent(exchange);
+            var createdEvent = ExchangeCreatedIntegrationEvent.FromEntity(exchange);
             await _events.Publish<IExchangeIntegrationEvent>(createdEvent);
 
             return true;
@@ -53,11 +53,11 @@ namespace StockMarket.Exchange.Api.Services
         public async Task<bool> DeleteOne(string code)
         {
             // delete exchange from database
-            var dbResult = await _context.Exchange.DeleteOneAsync(e => e.ExchangeCode == code);
-            if (dbResult.DeletedCount == 0) return false;
+            var dbExchange = await _context.Exchange.FindOneAndDeleteAsync(e => e.ExchangeCode == code);
+            if (dbExchange == null) return false;
 
             // broadcast exchange deleted event
-            var deletedEvent = new ExchangeDeletedIntegrationEvent(code);
+            var deletedEvent = ExchangeDeletedIntegrationEvent.FromId(dbExchange.Id);
             await _events.Publish<IExchangeIntegrationEvent>(deletedEvent);
 
             return true;
