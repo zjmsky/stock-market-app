@@ -44,7 +44,7 @@ namespace StockMarket.Sector.Api.Services
             }
 
             // broadcast sector created event
-            var createdEvent = new SectorCreatedIntegrationEvent(sector);
+            var createdEvent = SectorCreatedIntegrationEvent.FromEntity(sector);
             await _events.Publish<ISectorIntegrationEvent>(createdEvent);
 
             return true;
@@ -53,11 +53,11 @@ namespace StockMarket.Sector.Api.Services
         public async Task<bool> DeleteOne(string code)
         {
             // delete sector from database
-            var dbResult = await _context.Sector.DeleteOneAsync(e => e.SectorCode == code);
-            if (dbResult.DeletedCount == 0) return false;
+            var dbSector = await _context.Sector.FindOneAndDeleteAsync(e => e.SectorCode == code);
+            if (dbSector == null) return false;
 
             // broadcast sector deleted event
-            var deletedEvent = new SectorDeletedIntegrationEvent(code);
+            var deletedEvent = SectorDeletedIntegrationEvent.FromId(dbSector.Id);
             await _events.Publish<ISectorIntegrationEvent>(deletedEvent);
 
             return true;

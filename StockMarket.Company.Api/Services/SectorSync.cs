@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using MongoDB.Bson;
 using StockMarket.Company.Api.Models;
 
 namespace StockMarket.Company.Api.Services
@@ -17,8 +16,8 @@ namespace StockMarket.Company.Api.Services
 
         private async Task OnIntegrationEvent(ISectorIntegrationEvent integrationEvent)
         {
-            var createdEvent = integrationEvent as SectorCreatedEvent;
-            var deletedEvent = integrationEvent as SectorDeletedEvent;
+            var createdEvent = integrationEvent as SectorCreatedIntegrationEvent;
+            var deletedEvent = integrationEvent as SectorDeletedIntegrationEvent;
 
             if (createdEvent != null)
                 await OnCreatedEvent(createdEvent);
@@ -26,22 +25,21 @@ namespace StockMarket.Company.Api.Services
                 await OnDeletedEvent(deletedEvent);
         }
 
-        private async Task OnCreatedEvent(SectorCreatedEvent createdEvent)
+        private async Task OnCreatedEvent(SectorCreatedIntegrationEvent createdEvent)
         {
-            var sectorCode = createdEvent.SectorCode;
-            var sector = new Entities.Sector(sectorCode);
-            var exists = await _context.Sectors.Find(s => s.SectorCode == sectorCode).AnyAsync();
-           
+            var sector = createdEvent.IntoEntity();
+            var exists = await _context.Sectors.Find(s => s.Id == sector.Id).AnyAsync();
+            
             if (!exists)
                 await _context.Sectors.InsertOneAsync(sector);
             else
-                await _context.Sectors.ReplaceOneAsync(s => s.SectorCode == sectorCode, sector);
+                await _context.Sectors.ReplaceOneAsync(s => s.Id == sector.Id, sector);
         }
 
-        private async Task OnDeletedEvent(SectorDeletedEvent deletedEvent)
+        private async Task OnDeletedEvent(SectorDeletedIntegrationEvent deletedEvent)
         {
-            var sectorCode = deletedEvent.SectorCode;
-            await _context.Sectors.DeleteOneAsync(s => s.SectorCode == sectorCode);
+            var sectorId = deletedEvent.IntoId();
+            await _context.Sectors.DeleteOneAsync(s => s.Id == sectorId);
         }
     }
 }

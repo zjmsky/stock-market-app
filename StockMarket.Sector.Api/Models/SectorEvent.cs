@@ -1,32 +1,39 @@
 using EasyNetQ;
+using MongoDB.Bson;
 
 namespace StockMarket.Sector.Api.Models
 {
     [Queue("SectorIntegrationEvents")]
     public interface ISectorIntegrationEvent
     {
-        string SectorCode { get; set; }
+        string Id { get; set; }
     }
 
     public class SectorCreatedIntegrationEvent : ISectorIntegrationEvent
     {
+        public string Id { get; set; }
         public string SectorCode { get; set; }
-        public string Name { get; set; }
 
-        public SectorCreatedIntegrationEvent(Entities.Sector sector)
+        public static SectorCreatedIntegrationEvent FromEntity(Entities.Sector sector)
         {
-            SectorCode = sector.SectorCode;
-            Name = sector.Name;
+            return new SectorCreatedIntegrationEvent
+            {
+                Id = sector.Id.ToString(),
+                SectorCode = sector.SectorCode,
+            };
         }
     }
 
     public class SectorDeletedIntegrationEvent : ISectorIntegrationEvent
     {
-        public string SectorCode { get; set; }
+        public string Id { get; set; }
 
-        public SectorDeletedIntegrationEvent(string code)
+        public static SectorDeletedIntegrationEvent FromId(ObjectId id)
         {
-            SectorCode = code;
+            return new SectorDeletedIntegrationEvent
+            {
+                Id = id.ToString(),
+            };
         }
     }
 }
