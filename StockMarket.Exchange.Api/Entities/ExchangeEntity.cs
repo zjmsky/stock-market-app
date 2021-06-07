@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Text.Json.Serialization;
@@ -8,18 +9,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace StockMarket.Exchange.Api.Entities
 {
     [BsonIgnoreExtraElements]
-    public class Address
-    {
-        public string Line1 { get; set; }
-        public string Line2 { get; set; }
-        public string State { get; set; }
-        public string Country { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Email { get; set; }
-    }
-
-    [BsonIgnoreExtraElements]
-    public class Exchange
+    public class ExchangeEntity
     {
         [JsonIgnore]
         public ObjectId Id { get; set; }
@@ -29,7 +19,7 @@ namespace StockMarket.Exchange.Api.Entities
 
         public string Name { get; set; }
         public string Description { get; set; }
-        public Address Address { get; set; }
+        public AddressEntity Address { get; set; }
 
         public Dictionary<string, string> Validate()
         {
@@ -41,23 +31,21 @@ namespace StockMarket.Exchange.Api.Entities
             var countryCodeIsValid = Regex.IsMatch(CountryCode, @"^[A-Z]{2}$");
             if (!countryCodeIsValid) result.Add("countryCode", "invalid country code");
 
-            var emailExists = Address.Email != string.Empty;
-            var emailIsValid = Regex.IsMatch(Address.Email, @"@.*?\.");
-            if (emailExists && !emailIsValid) result.Add("email", "invalid email");
+            Address.Validate().ToList().ForEach(r => result.Add($"address.{r.Key}", r.Value));
 
             return result;
         }
     }
 
-    public class ExchangeConstraintBuilder
+    public class ExchangeCollectionManager
     {
-        public static void Add(IMongoCollection<Exchange> collection)
+        public static void CreateIndex(IMongoCollection<ExchangeEntity> collection)
         {
-            var indexBuilder = Builders<Exchange>.IndexKeys;
+            var indexBuilder = Builders<ExchangeEntity>.IndexKeys;
 
             var codeKey = indexBuilder.Ascending(e => e.ExchangeCode);
             var codeOpts = new CreateIndexOptions() { Unique = true };
-            var codeModel = new CreateIndexModel<Exchange>(codeKey, codeOpts);
+            var codeModel = new CreateIndexModel<ExchangeEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
     }

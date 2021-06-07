@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using StockMarket.Exchange.Api.Services;
+using StockMarket.Exchange.Api.Entities;
 
 namespace StockMarket.Exchange.Api.Controllers
 {
@@ -18,9 +19,9 @@ namespace StockMarket.Exchange.Api.Controllers
 
         [HttpPut]
         [Route("{code}")]
-        public async Task<ActionResult> Put(string code, [FromBody] Entities.Exchange exchange)
+        public async Task<ActionResult> Put(string code, [FromBody] ExchangeEntity exchange)
         {
-            exchange.ExchangeCode = code.ToUpper(); // just to be sure
+            exchange.ExchangeCode = code; // ensure consistency
             var success = await _repo.InsertOrReplaceOne(exchange);
             var payload = new { success };
             return success ? Ok(payload) : BadRequest(payload);
@@ -30,7 +31,7 @@ namespace StockMarket.Exchange.Api.Controllers
         [Route("{code}")]
         public async Task<ActionResult> Delete(string code)
         {
-            var success = await _repo.DeleteOne(code.ToUpper());
+            var success = await _repo.DeleteOne(code);
             var payload = new { success };
             return success ? Ok(payload) : BadRequest(payload);
         }
@@ -38,9 +39,7 @@ namespace StockMarket.Exchange.Api.Controllers
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] int page = 1, [FromQuery] int count = 10)
         {
-            page = Math.Max(page, 1);
-            count = Math.Clamp(count, 1, 25);
-            var exchangeList = await _repo.ListPage(page, count);
+            var exchangeList = await _repo.Enumerate(page, count);
             var payload = new { page, count = exchangeList.Count, exchanges = exchangeList };
             return Ok(payload);
         }

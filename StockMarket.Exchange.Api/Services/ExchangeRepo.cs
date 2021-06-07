@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using StockMarket.Exchange.Api.Models;
+using StockMarket.Exchange.Api.Entities;
 
 namespace StockMarket.Exchange.Api.Services
 {
@@ -16,7 +18,7 @@ namespace StockMarket.Exchange.Api.Services
             _events = events;
         }
 
-        public async Task<bool> InsertOrReplaceOne(Entities.Exchange exchange)
+        public async Task<bool> InsertOrReplaceOne(ExchangeEntity exchange)
         {
             // validate exchange model
             var validationErrors = exchange.Validate();
@@ -44,8 +46,8 @@ namespace StockMarket.Exchange.Api.Services
             }
 
             // broadcast created event
-            var createdEvent = ExchangeCreatedIntegrationEvent.FromEntity(exchange);
-            await _events.Publish<IExchangeIntegrationEvent>(createdEvent);
+            var creationEvent = ExchangeCreationEvent.FromEntity(exchange);
+            await _events.Publish<IExchangeIntegrationEvent>(creationEvent);
 
             return true;
         }
@@ -56,21 +58,25 @@ namespace StockMarket.Exchange.Api.Services
             var dbExchange = await _context.Exchange.FindOneAndDeleteAsync(e => e.ExchangeCode == code);
             if (dbExchange == null) return false;
 
-            // broadcast exchange deleted event
-            var deletedEvent = ExchangeDeletedIntegrationEvent.FromId(dbExchange.Id);
-            await _events.Publish<IExchangeIntegrationEvent>(deletedEvent);
+            // broadcast exchange deletion event
+            var deletionEvent = ExchangeDeletionEvent.FromId(dbExchange.Id);
+            await _events.Publish<IExchangeIntegrationEvent>(deletionEvent);
 
             return true;
         }
 
-        public async Task<List<Entities.Exchange>> ListPage(int page = 1, int count = 10)
+        public async Task<List<ExchangeEntity>> Enumerate(int page = 1, int count = 10)
         {
-            // TODO: add pagination feature
+            // ensure valid values
+            page = Math.Max(page, 1);
+            count = Math.Clamp(count, 1, 50);
+
+            // TODO: implement pagination
             var dbExchangeList = await _context.Exchange.Find(x => true).ToListAsync();
             return dbExchangeList;
         }
 
-        public async Task<Entities.Exchange> FindOneByCode(string code)
+        public async Task<ExchangeEntity> FindOneByCode(string code)
         {
             var dbExchange = await _context.Exchange.Find(e => e.ExchangeCode == code).FirstOrDefaultAsync();
             return dbExchange;
