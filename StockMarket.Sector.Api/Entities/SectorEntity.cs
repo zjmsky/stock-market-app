@@ -1,0 +1,61 @@
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Text.Json.Serialization;
+using MongoDB.Driver;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace StockMarket.Sector.Api.Entities
+{
+    [BsonIgnoreExtraElements]
+    public class SectorEntity
+    {
+        [JsonIgnore]
+        public ObjectId Id { get; set; }
+
+        public string SectorCode { get; set; } = String.Empty;
+
+        public string Name { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
+
+        public SectorEntity Sanitize()
+        {
+            SectorCode = SectorCode.Trim().ToUpper();
+            Name = Name.Trim();
+            Description = Description.Trim();
+            return this;
+        }
+
+        public Dictionary<string, string> Validate()
+        {
+            var result = new Dictionary<string, string>();
+
+            if (Regex.IsMatch(SectorCode, @"^[A-Z]{2}$") == false)
+                result.Add("sectorCode", "invalid");
+
+            if (Name.Length == 0)
+                result.Add("name", "required");
+            else if (Name.Length > 30)
+                result.Add("name", "too long");
+
+            if (Description.Length > 256)
+                result.Add("description", "too long");
+
+            return result;
+        }
+    }
+
+    public class SectorCollectionManager
+    {
+        public static void CreateIndex(IMongoCollection<SectorEntity> collection)
+        {
+            var indexBuilder = Builders<SectorEntity>.IndexKeys;
+
+            var codeKey = indexBuilder.Ascending(e => e.SectorCode);
+            var codeOpts = new CreateIndexOptions() { Unique = true };
+            var codeModel = new CreateIndexModel<SectorEntity>(codeKey, codeOpts);
+            collection.Indexes.CreateOne(codeModel);
+        }
+    }
+}

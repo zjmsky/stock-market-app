@@ -1,5 +1,6 @@
 using EasyNetQ;
 using MongoDB.Bson;
+using StockMarket.Sector.Api.Entities;
 
 namespace StockMarket.Sector.Api.Models
 {
@@ -9,14 +10,14 @@ namespace StockMarket.Sector.Api.Models
         string Id { get; set; }
     }
 
-    public class SectorCreatedIntegrationEvent : ISectorIntegrationEvent
+    public class SectorCreationEvent : ISectorIntegrationEvent
     {
         public string Id { get; set; }
         public string SectorCode { get; set; }
 
-        public static SectorCreatedIntegrationEvent FromEntity(Entities.Sector sector)
+        public static SectorCreationEvent FromEntity(SectorEntity sector)
         {
-            return new SectorCreatedIntegrationEvent
+            return new SectorCreationEvent
             {
                 Id = sector.Id.ToString(),
                 SectorCode = sector.SectorCode,
@@ -24,13 +25,13 @@ namespace StockMarket.Sector.Api.Models
         }
     }
 
-    public class SectorDeletedIntegrationEvent : ISectorIntegrationEvent
+    public class SectorDeletionEvent : ISectorIntegrationEvent
     {
         public string Id { get; set; }
 
-        public static SectorDeletedIntegrationEvent FromId(ObjectId id)
+        public static SectorDeletionEvent FromId(ObjectId id)
         {
-            return new SectorDeletedIntegrationEvent
+            return new SectorDeletionEvent
             {
                 Id = id.ToString(),
             };

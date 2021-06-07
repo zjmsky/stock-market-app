@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using StockMarket.Sector.Api.Models;
+using StockMarket.Sector.Api.Entities;
 
 namespace StockMarket.Sector.Api.Services
 {
@@ -16,10 +18,10 @@ namespace StockMarket.Sector.Api.Services
             _events = events;
         }
 
-        public async Task<bool> InsertOrReplaceOne(Entities.Sector sector)
+        public async Task<bool> InsertOrReplaceOne(SectorEntity sector)
         {
-            // validate sector model
-            var validationErrors = sector.Validate();
+            // sanitize and validate sector model
+            var validationErrors = sector.Sanitize().Validate();
             if (validationErrors.Count > 0) return false;
     
             // check if entry exists already
@@ -43,9 +45,9 @@ namespace StockMarket.Sector.Api.Services
                 catch (MongoWriteException) { return false; }
             }
 
-            // broadcast sector created event
-            var createdEvent = SectorCreatedIntegrationEvent.FromEntity(sector);
-            await _events.Publish<ISectorIntegrationEvent>(createdEvent);
+            // broadcast sector creation event
+            var creationEvent = SectorCreationEvent.FromEntity(sector);
+            await _events.Publish<ISectorIntegrationEvent>(creationEvent);
 
             return true;
         }
@@ -56,21 +58,23 @@ namespace StockMarket.Sector.Api.Services
             var dbSector = await _context.Sector.FindOneAndDeleteAsync(e => e.SectorCode == code);
             if (dbSector == null) return false;
 
-            // broadcast sector deleted event
-            var deletedEvent = SectorDeletedIntegrationEvent.FromId(dbSector.Id);
-            await _events.Publish<ISectorIntegrationEvent>(deletedEvent);
+            // broadcast sector deletion event
+            var deletionEvent = SectorDeletionEvent.FromId(dbSector.Id);
+            await _events.Publish<ISectorIntegrationEvent>(deletionEvent);
 
             return true;
         }
 
-        public async Task<List<Entities.Sector>> ListPage(int page = 1, int count = 10)
+        public async Task<List<SectorEntity>> Enumerate(int page = 1, int count = 10)
         {
+            page = Math.Max(page, 1);
+            count = Math.Clamp(count, 1, 25);
             // TODO: add pagination feature
             var dbSectorList = await _context.Sector.Find(x => true).ToListAsync();
             return dbSectorList;
         }
 
-        public async Task<Entities.Sector> FindOneByCode(string code)
+        public async Task<SectorEntity> FindOneByCode(string code)
         {
             var dbSector = await _context.Sector.Find(e => e.SectorCode == code).FirstOrDefaultAsync();
             return dbSector;
