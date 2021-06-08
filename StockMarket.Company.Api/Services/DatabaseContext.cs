@@ -1,19 +1,16 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using StockMarket.Company.Api.Models;
+using StockMarket.Company.Api.Entities;
 
 namespace StockMarket.Company.Api.Services
 {
     public class DatabaseContext
     {
-        private readonly DatabaseConfig _config;
-        private readonly MongoClient _client;
-        private readonly IMongoDatabase _db;
-
-        public readonly IMongoCollection<Entities.Exchange> Exchanges;
-        public readonly IMongoCollection<Entities.Sector> Sectors;
-        public readonly IMongoCollection<Entities.Company> Companies;
-        public readonly IMongoCollection<Entities.Listing> Listings;
+        public readonly IMongoCollection<ExchangeEntity> Exchanges;
+        public readonly IMongoCollection<SectorEntity> Sectors;
+        public readonly IMongoCollection<CompanyEntity> Companies;
+        public readonly IMongoCollection<ListingEntity> Listings;
 
         public DatabaseContext(IOptions<DatabaseConfig> config)
         {
@@ -22,21 +19,18 @@ namespace StockMarket.Company.Api.Services
             var client = new MongoClient(configVal.ConnectionString);
             var database = client.GetDatabase(configVal.DatabaseName);
 
-            var exchangeCollection = database.GetCollection<Entities.Exchange>("Exchanges");
-            Entities.ExchangeConstraintBuilder.Add(exchangeCollection);
+            var exchangeCollection = database.GetCollection<ExchangeEntity>("Exchanges");
+            ExchangeCollectionManager.CreateIndex(exchangeCollection);
 
-            var sectorCollection = database.GetCollection<Entities.Sector>("Companies");
-            Entities.SectorConstraintBuilder.Add(sectorCollection);
+            var sectorCollection = database.GetCollection<SectorEntity>("Companies");
+            SectorCollectionManager.CreateIndex(sectorCollection);
 
-            var companyCollection = database.GetCollection<Entities.Company>("Companies");
-            Entities.CompanyConstraintBuilder.Add(companyCollection);
+            var companyCollection = database.GetCollection<CompanyEntity>("Companies");
+            CompanyCollectionManager.CreateIndex(companyCollection);
 
-            var listingCollection = database.GetCollection<Entities.Listing>("Listings");
-            Entities.ListingConstraintBuilder.Add(listingCollection);
+            var listingCollection = database.GetCollection<ListingEntity>("Listings");
+            ListingCollectionManager.CreateIndex(listingCollection);
             
-            _config = configVal;
-            _client = client;
-            _db = database;
             this.Exchanges = exchangeCollection;
             this.Sectors = sectorCollection;
             this.Companies = companyCollection;

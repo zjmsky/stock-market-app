@@ -5,27 +5,21 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace StockMarket.Company.Api.Entities
 {
     [BsonIgnoreExtraElements]
-    public class Exchange
+    public class ExchangeEntity
     {
         public ObjectId Id { get; set; }
         public string ExchangeCode { get; set; }
-
-        [BsonConstructor]
-        public Exchange(string code)
-        {
-            ExchangeCode = code;
-        }
     }
 
-    public static class ExchangeConstraintBuilder
+    public static class ExchangeCollectionManager
     {
-        public static void Add(IMongoCollection<Exchange> collection)
+        public static void CreateIndex(IMongoCollection<ExchangeEntity> collection)
         {
-            var indexBuilder = Builders<Exchange>.IndexKeys;
+            var indexBuilder = Builders<ExchangeEntity>.IndexKeys;
 
             var codeKey = indexBuilder.Ascending(e => e.ExchangeCode);
             var codeOpts = new CreateIndexOptions { Unique = true };
-            var codeModel = new CreateIndexModel<Exchange>(codeKey, codeOpts);
+            var codeModel = new CreateIndexModel<ExchangeEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
     }

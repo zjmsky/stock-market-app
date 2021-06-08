@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using StockMarket.Company.Api.Entities;
 using StockMarket.Company.Api.Services;
 
 namespace StockMarket.Company.Api.Controllers
@@ -16,10 +17,29 @@ namespace StockMarket.Company.Api.Controllers
             _repo = repo;
         }
 
+        [HttpPut]
+        [Route("{code}")]
+        public async Task<ActionResult> Put(string code, [FromBody] CompanyEntity company)
+        {
+            company.CompanyCode = code; // ensure consistency
+            var success = await _repo.InsertOrReplaceOne(company);
+            var payload = new { success };
+            return success ? Ok(payload) : BadRequest(payload);
+        }
+
+        [HttpDelete]
+        [Route("{code}")]
+        public async Task<ActionResult> Delete(string code)
+        {
+            var success = await _repo.DeleteOne(code);
+            var payload = new { success };
+            return success ? Ok(payload) : BadRequest(payload);
+        }
+
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] int page, [FromQuery] int count)
         {
-            var companyList = await _repo.ListPage(page, count);
+            var companyList = await _repo.Enumerate(page, count);
             var payload = new { page = page, count = companyList.Count, companies = companyList };
             return Ok(payload);
         }
@@ -33,27 +53,11 @@ namespace StockMarket.Company.Api.Controllers
         }
 
         [HttpGet]
-        [Route("{ticker}")]
-        public async Task<ActionResult> Get(string ticker)
+        [Route("{code}")]
+        public async Task<ActionResult> Get(string code)
         {
-            var company = await _repo.FindOneByTicker(ticker);
+            var company = await _repo.FindOneByCode(code);
             return company != null ? Ok(company) : NotFound(null);
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Post([FromBody] Entities.Company company)
-        {
-            var success = await _repo.InsertOne(company);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
-        }
-
-        [HttpPut]
-        public async Task<ActionResult> Put([FromBody] Entities.Company company)
-        {
-            var success = await _repo.UpdateOne(company);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
         }
     }
 }

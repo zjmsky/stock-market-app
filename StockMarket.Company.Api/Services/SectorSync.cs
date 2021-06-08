@@ -16,29 +16,29 @@ namespace StockMarket.Company.Api.Services
 
         private async Task OnIntegrationEvent(ISectorIntegrationEvent integrationEvent)
         {
-            var createdEvent = integrationEvent as SectorCreatedIntegrationEvent;
-            var deletedEvent = integrationEvent as SectorDeletedIntegrationEvent;
+            var creationEvent = integrationEvent as SectorCreationEvent;
+            var deletionEvent = integrationEvent as SectorDeletionEvent;
 
-            if (createdEvent != null)
-                await OnCreatedEvent(createdEvent);
-            else if (deletedEvent != null)
-                await OnDeletedEvent(deletedEvent);
+            if (creationEvent != null)
+                await OnCreationEvent(creationEvent);
+            else if (deletionEvent != null)
+                await OnDeletionEvent(deletionEvent);
         }
 
-        private async Task OnCreatedEvent(SectorCreatedIntegrationEvent createdEvent)
+        private async Task OnCreationEvent(SectorCreationEvent creationEvent)
         {
-            var sector = createdEvent.IntoEntity();
+            var sector = creationEvent.ToEntity();
             var exists = await _context.Sectors.Find(s => s.Id == sector.Id).AnyAsync();
-            
+
             if (!exists)
                 await _context.Sectors.InsertOneAsync(sector);
             else
                 await _context.Sectors.ReplaceOneAsync(s => s.Id == sector.Id, sector);
         }
 
-        private async Task OnDeletedEvent(SectorDeletedIntegrationEvent deletedEvent)
+        private async Task OnDeletionEvent(SectorDeletionEvent deletionEvent)
         {
-            var sectorId = deletedEvent.IntoId();
+            var sectorId = deletionEvent.ToId();
             await _context.Sectors.DeleteOneAsync(s => s.Id == sectorId);
         }
     }

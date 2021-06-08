@@ -20,7 +20,6 @@ namespace StockMarket.Company.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddOptions<AuthConfig>().Bind(Configuration.GetSection("Auth"));
             services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
             services.AddOptions<EventBusConfig>().Bind(Configuration.GetSection("EventBus"));
 

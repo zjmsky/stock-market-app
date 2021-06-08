@@ -1,5 +1,6 @@
 using EasyNetQ;
 using MongoDB.Bson;
+using StockMarket.Company.Api.Entities;
 
 namespace StockMarket.Company.Api.Models
 {
@@ -9,14 +10,14 @@ namespace StockMarket.Company.Api.Models
         string Id { get; set; }
     }
 
-    public class ExchangeCreatedIntegrationEvent : IExchangeIntegrationEvent
+    public class ExchangeCreationEvent : IExchangeIntegrationEvent
     {
         public string Id { get; set; }
         public string ExchangeCode { get; set; }
 
-        public Entities.Exchange IntoEntity()
+        public ExchangeEntity ToEntity()
         {
-            return new Entities.Exchange
+            return new ExchangeEntity
             {
                 Id = new ObjectId(Id),
                 ExchangeCode = ExchangeCode,
@@ -24,11 +25,11 @@ namespace StockMarket.Company.Api.Models
         }
     }
 
-    public class ExchangeDeletedIntegrationEvent : IExchangeIntegrationEvent
+    public class ExchangeDeletionEvent : IExchangeIntegrationEvent
     {
         public string Id { get; set; }
 
-        public ObjectId IntoId()
+        public ObjectId ToId()
         {
             return new ObjectId(Id);
         }
