@@ -28,6 +28,7 @@ namespace StockMarket.Company.Api
             services.AddSingleton<ExchangeSync>();
             services.AddSingleton<SectorSync>();
             services.AddScoped<CompanyRepo>();
+            services.AddScoped<ListingRepo>();
 
             services.AddControllers();
 
