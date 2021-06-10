@@ -17,6 +17,11 @@ namespace StockMarket.Company.Api.Entities
         public string TickerSymbol { get; set; } = String.Empty;
         public string CompanyCode { get; set; } = String.Empty;
 
+        public ListingEntity Sanitize()
+        {
+            return this;
+        }
+
         public Dictionary<string, string> Validate()
         {
             var result = new Dictionary<string, string>();

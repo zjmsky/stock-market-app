@@ -18,6 +18,28 @@ namespace StockMarket.Company.Api.Services
             _events = events;
         }
 
+        private async Task<bool> ValidateReferences(CompanyEntity company)
+        {
+            // validate sector reference
+            var sectorExists = await _context.Sectors
+                .Find(s => s.SectorCode == company.SectorCode)
+                .AnyAsync();
+            if (!sectorExists) return false;
+
+            return true;
+        }
+
+        private async Task<bool> AssertNoReferences(CompanyEntity company)
+        {
+            // assert no reference in listings collection
+            var listingExists = await _context.Listings
+                .Find(l => l.CompanyCode == company.CompanyCode)
+                .AnyAsync();
+            if (listingExists) return false;
+
+            return true;
+        }
+
         private async Task<bool> InsertOrReplaceOneUnchecked(CompanyEntity company)
         {
             var code = company.CompanyCode;
@@ -40,42 +62,41 @@ namespace StockMarket.Company.Api.Services
             return true;
         }
 
-        public async Task<bool> InsertOrReplaceOne(CompanyEntity company)
+        private async Task<bool> DeleteOneUnchecked(CompanyEntity company)
         {
-            // validate company model
-            var validationErrors = company.Sanitize().Validate();
-            if (validationErrors.Count > 0) return false;
+            var result = await _context.Companies.DeleteOneAsync(c => c.Id == company.Id);
+            return result.DeletedCount > 0;
+        }
 
-            // ensure referenced sector exists  
-            var sectorExists = await _context.Sectors.Find(s => s.SectorCode == company.SectorCode).AnyAsync();
-            if (!sectorExists) return false;
-
-            // insert or replace company entity in database
-            var opResult = await InsertOrReplaceOneUnchecked(company);
-            if (!opResult) return false;
-
-            // broadcast company creation event
+        private async Task<bool> PublishCreation(CompanyEntity company)
+        {
             var creationEvent = CompanyCreationEvent.FromEntity(company);
             await _events.Publish<ICompanyIntegrationEvent>(creationEvent);
-
             return true;
         }
 
-        public async Task<bool> DeleteOne(string code)
+        private async Task<bool> PublishDeletion(CompanyEntity company)
         {
-            // ensure no reference listing exists
-            var listingExists = await _context.Listings.Find(l => l.CompanyCode == code).AnyAsync();
-            if (listingExists) return false;
-
-            // delete company entity
-            var company = await _context.Companies.FindOneAndDeleteAsync(c => c.CompanyCode == code);
-            if (company == null) return false;
-
-            // broadcast company deletion event
             var deletionEvent = CompanyDeletionEvent.FromId(company.Id);
             await _events.Publish<ICompanyIntegrationEvent>(deletionEvent);
-
             return true;
+        }
+
+        public async Task<bool> InsertOrReplaceOne(CompanyEntity company)
+        {
+            return company.Sanitize().Validate().Count == 0
+                && await ValidateReferences(company)
+                && await InsertOrReplaceOneUnchecked(company)
+                && await PublishCreation(company);
+        }
+
+        public async Task<bool> DeleteOne(string companyCode)
+        {
+            var company = await FindOneByCode(companyCode);
+            return company != null
+                && await AssertNoReferences(company)
+                && await DeleteOneUnchecked(company)
+                && await PublishDeletion(company);
         }
 
         public async Task<List<CompanyEntity>> Enumerate(int page = 1, int count = 10)
