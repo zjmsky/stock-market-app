@@ -21,15 +21,21 @@ namespace StockMarket.Exchange.Api.Entities
         public string Description { get; set; }
         public AddressEntity Address { get; set; }
 
+        public ExchangeEntity Sanitize()
+        {
+            Address.Sanitize();
+            return this;
+        }
+
         public Dictionary<string, string> Validate()
         {
             var result = new Dictionary<string, string>();
 
-            var exchCodeIsValid = Regex.IsMatch(ExchangeCode, @"^[A-Z]{2}$");
-            if (!exchCodeIsValid) result.Add("exchangeCode", "invalid exchange code");
+            if (Regex.IsMatch(ExchangeCode, @"^[A-Z]{2}$") == false)
+                result.Add("exchangeCode", "invalid");
 
-            var countryCodeIsValid = Regex.IsMatch(CountryCode, @"^[A-Z]{2}$");
-            if (!countryCodeIsValid) result.Add("countryCode", "invalid country code");
+            if (Regex.IsMatch(CountryCode, @"^[A-Z]{2}$") == false)
+                result.Add("countryCode", "invalid");
 
             Address.Validate().ToList().ForEach(r => result.Add($"address.{r.Key}", r.Value));
 

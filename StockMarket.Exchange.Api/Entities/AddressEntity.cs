@@ -1,3 +1,5 @@
+using System;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using MongoDB.Bson.Serialization.Attributes;
@@ -7,30 +9,26 @@ namespace StockMarket.Exchange.Api.Entities
     [BsonIgnoreExtraElements]
     public class AddressEntity
     {
-        public string Line1 { get; set; }
-        public string Line2 { get; set; }
-        public string State { get; set; }
-        public string Country { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Email { get; set; }
+        public string Line1 { get; set; } = String.Empty;
+        public string Line2 { get; set; } = String.Empty;
+        public string State { get; set; } = String.Empty;
+        public string Country { get; set; } = String.Empty;
+        public string PhoneNumber { get; set; } = String.Empty;
+        public string Email { get; set; } = String.Empty;
 
-        public void Sanitize()
+        public AddressEntity Sanitize()
         {
-            Line1 = Line1.Trim();
-            Line2 = Line2.Trim();
-            State = State.Trim();
-            Country = Country.Trim();
-            PhoneNumber = PhoneNumber.Trim();
-            Email = Email.Trim();
+            return this;
         }
 
         public Dictionary<string, string> Validate()
         {
             var result = new Dictionary<string, string>();
 
-            var emailExists = Email != string.Empty;
-            var emailIsValid = Regex.IsMatch(Email, @"@.*?\.");
-            if (emailExists && !emailIsValid) result.Add("email", "invalid email");
+            if (Email.Length == 0)
+                Expression.Empty();
+            else if (Regex.IsMatch(Email, @"@.*?\.") == false)
+                result.Add("email", "invalid");
 
             return result;
         }
