@@ -18,51 +18,82 @@ namespace StockMarket.Exchange.Api.Services
             _events = events;
         }
 
-        public async Task<bool> InsertOrReplaceOne(ExchangeEntity exchange)
+        private async Task<bool> ValidateReferences(ExchangeEntity exchange)
         {
-            // validate exchange model
-            var validationErrors = exchange.Validate();
-            if (validationErrors.Count > 0) return false;
-    
-            // check if entry exists already
-            var exchangeExists = await _context.Exchange
-                .Find(e => e.ExchangeCode == exchange.ExchangeCode)
+            // nothing for now
+            await Task.Yield();
+            return true;
+        }
+
+        private async Task<bool> AssertNoReferences(ExchangeEntity exchange)
+        {
+            // assert no reference in listing collection
+            var listingExists = await _context.Listings
+                .Find(l => l.ExchangeCode == exchange.ExchangeCode)
                 .AnyAsync();
-
-            if (!exchangeExists)
-            {
-                // try inserting exchange model
-                // this fails if any constraint is violated
-                try { await _context.Exchange.InsertOneAsync(exchange); }
-                catch (MongoWriteException) { return false; }
-            }
-            else
-            {
-                // try replacing exchange model
-                // this fails if any constraint is violated
-                var code = exchange.ExchangeCode;
-                try { await _context.Exchange.ReplaceOneAsync(e => e.ExchangeCode == code, exchange); }
-                catch (MongoWriteException) { return false; }
-            }
-
-            // broadcast created event
-            var creationEvent = ExchangeCreationEvent.FromEntity(exchange);
-            await _events.Publish<IExchangeIntegrationEvent>(creationEvent);
+            if (listingExists) return false;
 
             return true;
         }
 
-        public async Task<bool> DeleteOne(string code)
+        private async Task<bool> InsertOrReplaceOneUnchecked(ExchangeEntity exchange)
         {
-            // delete exchange from database
-            var dbExchange = await _context.Exchange.FindOneAndDeleteAsync(e => e.ExchangeCode == code);
-            if (dbExchange == null) return false;
+            var code = exchange.ExchangeCode;
+            var exchangeExists = await _context.Exchange
+                .Find(e => e.ExchangeCode == code)
+                .AnyAsync();
 
-            // broadcast exchange deletion event
-            var deletionEvent = ExchangeDeletionEvent.FromId(dbExchange.Id);
-            await _events.Publish<IExchangeIntegrationEvent>(deletionEvent);
+            try
+            {
+                if (!exchangeExists)
+                    await _context.Exchange.InsertOneAsync(exchange);
+                else
+                    await _context.Exchange.ReplaceOneAsync(e => e.ExchangeCode == code, exchange);
+            }
+            catch (MongoWriteException)
+            {
+                return false;
+            }
 
             return true;
+        }
+
+        private async Task<bool> DeleteOneUnchecked(ExchangeEntity exchange)
+        {
+            var code = exchange.ExchangeCode;
+            var result = await _context.Exchange.DeleteOneAsync(e => e.ExchangeCode == code);
+            return result.DeletedCount > 0;
+        }
+
+        private async Task<bool> PublishCreation(ExchangeEntity exchange)
+        {
+            var creationEvent = ExchangeCreationEvent.FromEntity(exchange);
+            await _events.Publish<IExchangeIntegrationEvent>(creationEvent);
+            return true;
+        }
+
+        private async Task<bool> PublishDeletion(ExchangeEntity exchange)
+        {
+            var deletionEvent = ExchangeDeletionEvent.FromId(exchange.Id);
+            await _events.Publish<IExchangeIntegrationEvent>(deletionEvent);
+            return true;
+        }
+
+        public async Task<bool> InsertOrReplaceOne(ExchangeEntity exchange)
+        {
+            return exchange.Sanitize().Validate().Count == 0
+                && await ValidateReferences(exchange)
+                && await InsertOrReplaceOneUnchecked(exchange)
+                && await PublishCreation(exchange);
+        }
+
+        public async Task<bool> DeleteOne(string code)
+        {
+            var exchange = await FindOneByCode(code);
+            return exchange != null
+                && await AssertNoReferences(exchange)
+                && await DeleteOneUnchecked(exchange)
+                && await PublishDeletion(exchange);
         }
 
         public async Task<List<ExchangeEntity>> Enumerate(int page = 1, int count = 10)
