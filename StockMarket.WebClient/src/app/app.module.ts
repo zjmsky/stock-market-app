@@ -1,21 +1,21 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { MaterialModule } from "./material.module";
-import { RoutingModule } from "./routing.module";
+
+import { AppMaterialModule } from "./material.module";
+import { AppRouterModule } from "./app.routes";
 
 import { AppComponent } from "./app.component";
-import { ToolbarComponent } from "./toolbar/toolbar.component";
-import { LoginComponent } from "./login/login.component";
+import { ToolbarComponent } from "@root/shared/toolbar/toolbar.component";
 
 @NgModule({
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
-        RoutingModule,
-        MaterialModule
+        AppMaterialModule,
+        AppRouterModule
     ],
-    declarations: [AppComponent, ToolbarComponent, LoginComponent],
+    declarations: [AppComponent, ToolbarComponent],
     bootstrap: [AppComponent]
 })
 export class AppModule {}
