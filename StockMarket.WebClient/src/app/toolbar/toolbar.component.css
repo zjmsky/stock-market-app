@@ -1,0 +1,17 @@
+.toolbar {
+    height: 60px;
+    box-shadow: 0px 0px 15px grey;
+}
+
+.logo {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.flex-spacer {
+    flex: 1 1 auto;
+}
+
+.signup-button {
+    border-color: white;
+}
