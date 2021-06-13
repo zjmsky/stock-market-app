@@ -4,5 +4,6 @@ module.exports = {
     trailingComma: "none",
     bracketSpacing: true,
     arrowParens: "always",
-    endOfLine: "lf"
+    endOfLine: "lf",
+    htmlWhitespaceSensitivity: "ignore"
 };

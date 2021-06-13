@@ -1,1 +1,40 @@
-<p>Hello from login</p>
+<mat-card>
+    <mat-card-title>Login</mat-card-title>
+    <mat-card-content>
+        <form>
+            <mat-form-field hideRequiredMarker appearance="outline">
+                <mat-label>Username</mat-label>
+                <input
+                    matInput
+                    type="text"
+                    placeholder="Username"
+                    autocomplete="off"
+                    formControlName="username"
+                    required
+                />
+            </mat-form-field>
+            <mat-form-field hideRequiredMarker appearance="outline">
+                <mat-label>Password</mat-label>
+                <input
+                    matInput
+                    type="password"
+                    placeholder="Password"
+                    formControlName="password"
+                    required
+                />
+            </mat-form-field>
+            <div id="forgot-password-help">
+                <a href="/account/reset" id="forgot-password-link">
+                    Forgot Password?
+                </a>
+            </div>
+            <button mat-raised-button color="primary" class="submit-button">
+                Login
+            </button>
+            <div id="register-help">
+                Don't have an account?
+                <a href="/account/register" id="register-link">Register</a>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>

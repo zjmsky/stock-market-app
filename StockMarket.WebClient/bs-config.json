@@ -1,0 +1,7 @@
+{
+    "port": 4200,
+    "files": ["./dist/stock-market-client/**/*"],
+    "server": {
+        "baseDir": "./dist/stock-market-client"
+    }
+}
