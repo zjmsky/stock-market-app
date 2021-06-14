@@ -1,7 +1,7 @@
 <mat-card>
     <mat-card-title>Login</mat-card-title>
     <mat-card-content>
-        <form>
+        <form [formGroup]="loginForm">
             <mat-form-field hideRequiredMarker appearance="outline">
                 <mat-label>Username</mat-label>
                 <input

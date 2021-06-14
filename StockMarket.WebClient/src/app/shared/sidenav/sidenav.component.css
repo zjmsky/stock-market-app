@@ -1,0 +1,29 @@
+#left-sidenav {
+    min-width: 200px;
+    background-color: #fff;
+    padding: 0 0;
+}
+
+#main-content {
+    width: calc(100vw - 200px);
+    height: calc(100vh);
+    background: #eee;
+    padding: 0 0;
+}
+
+.nav-list-item {
+    display: inline-flex;
+    width: 100%;
+    vertical-align: middle;
+    padding: 0 0;
+    color: #333;
+}
+
+.nav-icon {
+    margin-right: 7px;
+    color: #333;
+}
+
+.nav-title {
+    font-size: 14px;
+}

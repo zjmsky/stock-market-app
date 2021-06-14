@@ -7,6 +7,7 @@ import { AppRouterModule } from "./app.routes";
 
 import { AppComponent } from "./app.component";
 import { ToolbarComponent } from "@root/shared/toolbar/toolbar.component";
+import { SidenavComponent } from "@root/shared/sidenav/sidenav.component";
 
 @NgModule({
     imports: [
@@ -15,7 +16,7 @@ import { ToolbarComponent } from "@root/shared/toolbar/toolbar.component";
         AppMaterialModule,
         AppRouterModule
     ],
-    declarations: [AppComponent, ToolbarComponent],
+    declarations: [AppComponent, ToolbarComponent, SidenavComponent],
     bootstrap: [AppComponent]
 })
 export class AppModule {}
