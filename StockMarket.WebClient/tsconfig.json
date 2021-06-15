@@ -17,7 +17,8 @@
         "module": "es2020",
         "lib": ["es2018", "dom"],
         "paths": {
-            "@root/*": ["src/app/*"]
+            "@root/*": ["src/app/*"],
+            "@env/*": ["src/environments/*"]
         }
     },
     "angularCompilerOptions": {

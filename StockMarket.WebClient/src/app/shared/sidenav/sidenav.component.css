@@ -6,7 +6,7 @@
 
 #main-content {
     width: calc(100vw - 200px);
-    height: calc(100vh);
+    height: calc(100vh - 60px);
     background: #eee;
     padding: 0 0;
 }

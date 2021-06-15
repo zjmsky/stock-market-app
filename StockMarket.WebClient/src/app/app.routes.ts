@@ -5,10 +5,13 @@ const loadHomeModule = () =>
     import("@root/home/home.module").then((x) => x.HomeModule);
 const loadAccountModule = () =>
     import("@root/account/account.module").then((x) => x.AccountModule);
+const loadDashboardModule = () =>
+    import("@root/dashboard/dashboard.module").then((x) => x.DashboardModule);
 
 const routes: Routes = [
     { path: "", loadChildren: loadHomeModule },
-    { path: "account", loadChildren: loadAccountModule }
+    { path: "account", loadChildren: loadAccountModule },
+    { path: "dashboard", loadChildren: loadDashboardModule }
 ];
 
 @NgModule({

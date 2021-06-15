@@ -54,7 +54,7 @@ class ConfirmValidator {
         field: string,
         control: AbstractControl
     ): ValidationErrors | null {
-        if (control.parent === null) return { match: true };
+        if (control.parent == null) return { match: true };
         if (control.parent.value === null) return { match: true };
 
         type ControlSet = { [key: string]: AbstractControl };

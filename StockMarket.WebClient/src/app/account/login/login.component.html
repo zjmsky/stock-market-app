@@ -1,7 +1,10 @@
 <mat-card>
     <mat-card-title>Login</mat-card-title>
     <mat-card-content>
-        <form [formGroup]="loginForm">
+        <form [formGroup]="loginForm!" (ngSubmit)="onSubmit()">
+            <mat-error id="form-submit-error" *ngIf="formError">
+                {{ formError }}
+            </mat-error>
             <mat-form-field hideRequiredMarker appearance="outline">
                 <mat-label>Username</mat-label>
                 <input
@@ -24,16 +27,23 @@
                 />
             </mat-form-field>
             <div id="forgot-password-help">
-                <a href="/account/reset" id="forgot-password-link">
+                <a routerLink="/account/reset" id="forgot-password-link">
                     Forgot Password?
                 </a>
             </div>
-            <button mat-raised-button color="primary" class="submit-button">
+            <button
+                mat-raised-button
+                color="primary"
+                class="submit-button"
+                [disabled]="formLoading"
+            >
                 Login
             </button>
             <div id="register-help">
                 Don't have an account?
-                <a href="/account/register" id="register-link">Register</a>
+                <a routerLink="/account/register" id="register-link">
+                    Register
+                </a>
             </div>
         </form>
     </mat-card-content>

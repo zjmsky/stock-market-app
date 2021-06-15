@@ -18,6 +18,11 @@ form {
     padding: 10px 30px;
 }
 
+#form-submit-error {
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
 #forgot-password-help {
     margin-top: -5px;
     margin-bottom: 20px;
