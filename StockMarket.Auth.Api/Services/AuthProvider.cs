@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using StockMarket.Auth.Api.Data;
 using StockMarket.Auth.Api.Models;
 using StockMarket.Auth.Api.Entities;
 
@@ -17,45 +16,45 @@ namespace StockMarket.Auth.Api.Services
 {
     public class AuthProvider
     {
-        private readonly AppDbContext _context;
+        private readonly DatabaseContext _context;
         private readonly AuthConfig _config;
 
-        public AuthProvider(AppDbContext context, IOptions<AuthConfig> config)
+        public AuthProvider(DatabaseContext context, IOptions<AuthConfig> config)
         {
             _context = context;
             _config = config.Value;
         }
 
-        public async Task<bool> Signup(string username, string password, string email)
+        public async Task<bool> Register(string username, string password, string email)
         {
             // construct general user object
-            var user = new User
+            var user = new UserEntity
             {
                 Username = username,
                 Password = password,
                 Role = UserRole.General,
                 Email = email,
                 IsVerified = false,
-                RefreshTokens = new List<RefreshToken>(),
+                RefreshTokens = new List<RefreshTokenEntity>(),
             };
 
-            var validationResult = user.Validate();
-            if (validationResult.Count > 0)
+            if (user.Validate().Count > 0)
                 return false;
 
-            // insert user into database
-            // this can fail if duplicate entry is found
+            // try to insert user into database
             try { await _context.Users.InsertOneAsync(user); }
             catch (MongoWriteException) { return false; }
 
             return true;
         }
 
-        public async Task<AuthResponse> Authenticate(string username, string password, string ipAddress)
+        public async Task< AuthResponse> Authenticate(string username, string password, string ipAddress)
         {
             // retrieve user document
-            var userQuery = Builders<User>.Filter.Eq("Username", username);
-            var dbUser = await _context.Users.Find(userQuery).FirstOrDefaultAsync();
+            var dbUser = await _context.Users
+                .Find(u => u.Username == username)
+                .FirstOrDefaultAsync();
+            
             if (dbUser == null)
                 return AuthResponse.Failure("invalid username");
             if (dbUser.Password != password)
@@ -65,9 +64,9 @@ namespace StockMarket.Auth.Api.Services
 
             // generate and push refresh token to user document
             var refreshToken = GenerateRefreshToken(dbUser);
-            var dbToken = new RefreshToken(refreshToken, ipAddress);
-            var tokenUpdate = Builders<User>.Update.Push("RefreshTokens", dbToken);
-            await _context.Users.FindOneAndUpdateAsync(userQuery, tokenUpdate);
+            var dbToken = new RefreshTokenEntity(refreshToken, ipAddress);
+            var tokenUpdate = Builders<UserEntity>.Update.Push("RefreshTokens", dbToken);
+            await _context.Users.FindOneAndUpdateAsync(u => u.Username == username, tokenUpdate);
 
             // generate access token
             var accessToken = GenerateAccessToken(dbUser);
@@ -80,15 +79,16 @@ namespace StockMarket.Auth.Api.Services
             // retrieve user document
             var userId = GetUserIdFromToken(refreshToken);
 
-            var userQuery = Builders<User>.Filter.Eq("_id", userId);
-            var dbUser = await _context.Users.Find(userQuery).FirstOrDefaultAsync();
+            var dbUser = await _context.Users
+                .Find(u => u.Id == userId)
+                .FirstOrDefaultAsync();
             if (dbUser == null)
                 return AuthResponse.Failure("invalid user - id:" + userId);
 
             // remove expired tokens from user document
             dbUser.RefreshTokens.RemoveAll(t => t.HasExpired());
-            var tokenUpdate = Builders<User>.Update.Set("RefreshTokens", dbUser.RefreshTokens);
-            await _context.Users.FindOneAndUpdateAsync(userQuery, tokenUpdate);
+            var tokenUpdate = Builders<UserEntity>.Update.Set("RefreshTokens", dbUser.RefreshTokens);
+            await _context.Users.FindOneAndUpdateAsync(u => u.Id == userId, tokenUpdate);
 
             // match the token string and ip address
             var dbToken = dbUser.RefreshTokens.Find(t => t.Token == refreshToken);
@@ -105,8 +105,9 @@ namespace StockMarket.Auth.Api.Services
         {
             // retrieve user document
             var userId = GetUserIdFromToken(refreshToken);
-            var userQuery = Builders<User>.Filter.Eq("Id", userId);
-            var dbUser = await _context.Users.Find(userQuery).FirstOrDefaultAsync();
+            var dbUser = await _context.Users
+                .Find(u => u.Id == userId)
+                .FirstOrDefaultAsync();
             if (dbUser == null)
                 return false;
 
@@ -116,13 +117,13 @@ namespace StockMarket.Auth.Api.Services
                 return false;
 
             // remove matching token object from user document
-            var tokenUpdate = Builders<User>.Update.Pull("RefreshTokens", dbToken);
-            await _context.Users.FindOneAndUpdateAsync(userQuery, tokenUpdate);
+            var tokenUpdate = Builders<UserEntity>.Update.Pull("RefreshTokens", dbToken);
+            await _context.Users.FindOneAndUpdateAsync(u => u.Id == userId, tokenUpdate);
 
             return true;
         }
 
-        private string GenerateAccessToken(User user)
+        private string GenerateAccessToken(UserEntity user)
         {
             var claims = new Claim[]
             {
@@ -145,7 +146,7 @@ namespace StockMarket.Auth.Api.Services
             return tokenHandler.WriteToken(token);
         }
 
-        private string GenerateRefreshToken(User user)
+        private string GenerateRefreshToken(UserEntity user)
         {
             // encode user id => 12 bytes = 16 characters in base64
             var idBytes = user.Id.ToByteArray();

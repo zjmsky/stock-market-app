@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using StockMarket.Auth.Api.Data;
 using StockMarket.Auth.Api.Models;
 using StockMarket.Auth.Api.Services;
 
@@ -28,8 +27,7 @@ namespace StockMarket.Auth.Api
             services.AddOptions<AuthConfig>().Bind(Configuration.GetSection("Auth"));
             services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
 
-            services.AddSingleton<AppDbContext>();
-
+            services.AddSingleton<DatabaseContext>();
             services.AddScoped<AuthProvider>();
 
             services.AddAuthentication(options =>
@@ -55,8 +53,8 @@ namespace StockMarket.Auth.Api
                 options.TokenValidationParameters = tokenParams;
             });
 
+            services.AddCors();
             services.AddControllers();
-
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StockMarket.Auth.Api", Version = "v1" }));
         }
@@ -71,12 +69,10 @@ namespace StockMarket.Auth.Api
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "StockMarket.Auth.Api v1"));
             }
 
+            app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseRouting();
-
             app.UseAuthentication();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }

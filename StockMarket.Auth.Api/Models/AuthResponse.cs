@@ -1,32 +1,38 @@
+using System;
+
 namespace StockMarket.Auth.Api.Models
 {
     public class AuthResponse
     {
-        public string AccessToken { get; set; }
-        public string RefreshToken { get; set; }
-        public string Error { get; set; }
+        public readonly string AccessToken;
+        public readonly string RefreshToken;
+        public readonly string Error;
+
+        private AuthResponse(string accessToken, string refreshToken)
+        {
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
+            Error = String.Empty;
+        }
+
+        private AuthResponse(string error)
+        {
+            AccessToken = String.Empty;
+            RefreshToken = String.Empty;
+            Error = error;
+        }
 
         public static AuthResponse Success(string accessToken, string refreshToken)
         {
-            return new AuthResponse()
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                Error = string.Empty,
-            };
+            return new AuthResponse(accessToken, refreshToken);
         }
 
         public static AuthResponse Failure(string message)
         {
-            return new AuthResponse()
-            {
-                AccessToken = string.Empty,
-                RefreshToken = string.Empty,
-                Error = message,
-            };
+            return new AuthResponse(message);
         }
 
-        public bool IsSuccess() => Error == string.Empty;
-        public bool IsFailure() => Error != string.Empty;
+        public bool IsSuccess() => Error == String.Empty;
+        public bool IsFailure() => Error != String.Empty;
     }
 }

@@ -8,7 +8,7 @@ namespace StockMarket.Auth.Api.Controllers
 {
     [AllowAnonymous]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly AuthProvider _authProvider;
@@ -18,26 +18,36 @@ namespace StockMarket.Auth.Api.Controllers
             _authProvider = authProvider;
         }
 
-        [HttpPost("signup")]
-        public async Task<ActionResult> Signup([FromBody] SignupRequest request)
+        [HttpPost("register")]
+        public async Task<ActionResult> Register([FromBody] RegisterRequest request)
         {
             var username = request.Username;
             var password = request.Password;
             var email = request.Email;
-            var success = await _authProvider.Signup(username, password, email);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
+            var success = await _authProvider.Register(username, password, email);
+            return success ? Ok() : BadRequest();
         }
 
-        [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult> Login([FromBody] LoginRequest request)
         {
             var username = request.Username;
             var password = request.Password;
             var ipAddress = GetIpAddress();
             var response = await _authProvider.Authenticate(username, password, ipAddress);
-            return response.IsSuccess() ? Ok(response) : BadRequest(response);
+            if (response.IsSuccess())
+            {
+                var accessToken = response.AccessToken;
+                var refreshToken = response.RefreshToken;
+                var payload = new { accessToken, refreshToken };
+                return Ok(payload);
+            }
+            else
+            {
+                var error = response.Error;
+                var payload = new { error };
+                return BadRequest(payload);
+            }
         }
 
         [HttpPost("refresh")]
@@ -52,8 +62,7 @@ namespace StockMarket.Auth.Api.Controllers
         public async Task<ActionResult> Logout([FromHeader] string refreshToken)
         {
             var success = await _authProvider.Revoke(refreshToken);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
+            return success ? Ok() : BadRequest();
         }
 
         private string GetIpAddress()
