@@ -1,0 +1,13 @@
+{
+    "Routes": [
+        {
+            "DownstreamPathTemplate": "/auth/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5010" }],
+            "UpstreamPathTemplate": "/auth/{everything}"
+        }
+    ],
+    "GlobalConfiguration": {
+        "BaseUrl": "http://localhost:5000"
+    }
+}
