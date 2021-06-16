@@ -16,6 +16,7 @@ specifiers:
     "@angular/router": ~12.0.4
     "@types/jasmine": ~3.6.11
     "@types/node": ^12.20.15
+    "@types/uuid": ^8.3.0
     jasmine-core: ~3.7.1
     karma: ~6.3.3
     karma-chrome-launcher: ~3.1.0
@@ -26,6 +27,7 @@ specifiers:
     rxjs: ~6.6.7
     tslib: ^2.3.0
     typescript: ~4.2.4
+    uuid: ^8.3.2
     zone.js: ~0.11.4
 
 dependencies:
@@ -41,6 +43,7 @@ dependencies:
     "@angular/router": 12.0.4_4c7f1d965fcee6957865aae2bc96c3da
     rxjs: 6.6.7
     tslib: 2.3.0
+    uuid: 8.3.2
     zone.js: 0.11.4
 
 devDependencies:
@@ -49,6 +52,7 @@ devDependencies:
     "@angular/compiler-cli": 12.0.4_004f09bfe77bdee2d3a04c898248084e
     "@types/jasmine": 3.6.11
     "@types/node": 12.20.15
+    "@types/uuid": 8.3.0
     jasmine-core: 3.7.1
     karma: 6.3.3
     karma-chrome-launcher: 3.1.0
@@ -2280,6 +2284,13 @@ packages:
         resolution:
             {
                 integrity: sha512-K5K+yml8LTo9bWJI/rECfIPrGgxdpeNbj+d53lwN4QjW1MCwlkhUms+gtdzigTeUyBr09+u8BwOIY3MXvHdcsA==
+            }
+        dev: true
+
+    /@types/uuid/8.3.0:
+        resolution:
+            {
+                integrity: sha512-eQ9qFW/fhfGJF8WKHGEHZEyVWfZxrT+6CLIJGBcZPfxUh/+BnEj+UCGYMlr9qZuX/2AltsvwrGqp0LhEW8D0zQ==
             }
         dev: true
 
@@ -10338,7 +10349,6 @@ packages:
                 integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
             }
         hasBin: true
-        dev: true
 
     /validate-npm-package-name/3.0.0:
         resolution: { integrity: sha1-X6kS2B630MdK/BQN5zF/DKffQ34= }

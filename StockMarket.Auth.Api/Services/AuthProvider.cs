@@ -1,14 +1,13 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
-using MongoDB.Driver;
 using StockMarket.Auth.Api.Models;
 using StockMarket.Auth.Api.Entities;
 
@@ -16,110 +15,80 @@ namespace StockMarket.Auth.Api.Services
 {
     public class AuthProvider
     {
-        private readonly DatabaseContext _context;
         private readonly AuthConfig _config;
+        private readonly UserRepo _repo;
 
-        public AuthProvider(DatabaseContext context, IOptions<AuthConfig> config)
+        public AuthProvider(IOptions<AuthConfig> config, UserRepo repo)
         {
-            _context = context;
             _config = config.Value;
+            _repo = repo;
         }
 
         public async Task<bool> Register(string username, string password, string email)
         {
-            // construct general user object
-            var user = new UserEntity
-            {
-                Username = username,
-                Password = password,
-                Role = UserRole.General,
-                Email = email,
-                IsVerified = false,
-                RefreshTokens = new List<RefreshTokenEntity>(),
-            };
-
-            if (user.Validate().Count > 0)
-                return false;
-
-            // try to insert user into database
-            try { await _context.Users.InsertOneAsync(user); }
-            catch (MongoWriteException) { return false; }
-
-            return true;
+            var user = UserEntity.General(username, password, email);
+            return await _repo.InsertOne(user);
         }
 
-        public async Task< AuthResponse> Authenticate(string username, string password, string ipAddress)
+        public async Task<AuthResult> Authenticate(string username, string password, string deviceId)
         {
-            // retrieve user document
-            var dbUser = await _context.Users
-                .Find(u => u.Username == username)
-                .FirstOrDefaultAsync();
+            var user = await _repo.FindOneByUsername(username);
+            if (user == null || user.Password != password)
+                return AuthResult.Failure("invalid username or password");
+            else if (user.IsVerified == false)
+                return AuthResult.Failure("unverified user");
+
+            var refreshToken = GenerateRefreshToken(user.Id);
+            user.RefreshTokens[deviceId] = new RefreshTokenEntity(refreshToken);
+
+            var accessToken = GenerateAccessToken(user);
+
+            RevokeExpiredTokens(user);
+            if (await _repo.ReplaceOne(user) == false)
+                return AuthResult.Failure("unknown error");
+
+            return AuthResult.Success(accessToken, refreshToken);
+        }
+
+        public async Task<AuthResult> Refresh(string refreshToken, string deviceId)
+        {
+            var userId = GetUserIdFromToken(refreshToken);
+            var user = await _repo.FindOnyById(userId);
+            if (user == null)
+                return AuthResult.Failure("invalid user");
+            else if (user.RefreshTokens.ContainsKey(deviceId) == false)
+                return AuthResult.Failure("invalid token");
+
+            var storedToken = user.RefreshTokens[deviceId];
+            if (storedToken.HasExpired())
+                return AuthResult.Failure("invalid token");
+            else if (storedToken.Token != refreshToken)
+                return AuthResult.Failure("invalid token");
             
-            if (dbUser == null)
-                return AuthResponse.Failure("invalid username");
-            if (dbUser.Password != password)
-                return AuthResponse.Failure("invalid password");
-            if (dbUser.IsVerified == false)
-                return AuthResponse.Failure("unverified user");
+            var accessToken = GenerateAccessToken(user);
 
-            // generate and push refresh token to user document
-            var refreshToken = GenerateRefreshToken(dbUser);
-            var dbToken = new RefreshTokenEntity(refreshToken, ipAddress);
-            var tokenUpdate = Builders<UserEntity>.Update.Push("RefreshTokens", dbToken);
-            await _context.Users.FindOneAndUpdateAsync(u => u.Username == username, tokenUpdate);
-
-            // generate access token
-            var accessToken = GenerateAccessToken(dbUser);
-
-            return AuthResponse.Success(accessToken, refreshToken);
+            return AuthResult.Success(accessToken, refreshToken);
         }
 
-        public async Task<AuthResponse> Refresh(string refreshToken, string ipAddress)
+        public async Task<bool> Revoke(string refreshToken, string deviceId)
         {
-            // retrieve user document
             var userId = GetUserIdFromToken(refreshToken);
-
-            var dbUser = await _context.Users
-                .Find(u => u.Id == userId)
-                .FirstOrDefaultAsync();
-            if (dbUser == null)
-                return AuthResponse.Failure("invalid user - id:" + userId);
-
-            // remove expired tokens from user document
-            dbUser.RefreshTokens.RemoveAll(t => t.HasExpired());
-            var tokenUpdate = Builders<UserEntity>.Update.Set("RefreshTokens", dbUser.RefreshTokens);
-            await _context.Users.FindOneAndUpdateAsync(u => u.Id == userId, tokenUpdate);
-
-            // match the token string and ip address
-            var dbToken = dbUser.RefreshTokens.Find(t => t.Token == refreshToken);
-            if (dbToken == null || dbToken.IpAddress != ipAddress)
-                return AuthResponse.Failure("invalid token");
-
-            // generate access token
-            var accessToken = GenerateAccessToken(dbUser);
-
-            return AuthResponse.Success(accessToken, dbToken.Token);
+            var user = await _repo.FindOnyById(userId);
+            return user != null
+                && user.RefreshTokens.Remove(deviceId)
+                && await _repo.ReplaceOne(user);
         }
 
-        public async Task<bool> Revoke(string refreshToken)
+        private bool RevokeExpiredTokens(UserEntity user)
         {
-            // retrieve user document
-            var userId = GetUserIdFromToken(refreshToken);
-            var dbUser = await _context.Users
-                .Find(u => u.Id == userId)
-                .FirstOrDefaultAsync();
-            if (dbUser == null)
+            var updatedTokens = user.RefreshTokens
+                .Where(p => p.Value.HasExpired())
+                .ToDictionary(p => p.Key, p => p.Value);
+            
+            if (updatedTokens.Count == user.RefreshTokens.Count)
                 return false;
-
-            // retrieve matching token object
-            var dbToken = dbUser.RefreshTokens.Find(t => t.Token == refreshToken);
-            if (dbToken == null)
-                return false;
-
-            // remove matching token object from user document
-            var tokenUpdate = Builders<UserEntity>.Update.Pull("RefreshTokens", dbToken);
-            await _context.Users.FindOneAndUpdateAsync(u => u.Id == userId, tokenUpdate);
-
+            
+            user.RefreshTokens = updatedTokens;
             return true;
         }
 
@@ -146,10 +115,10 @@ namespace StockMarket.Auth.Api.Services
             return tokenHandler.WriteToken(token);
         }
 
-        private string GenerateRefreshToken(UserEntity user)
+        private string GenerateRefreshToken(ObjectId userId)
         {
             // encode user id => 12 bytes = 16 characters in base64
-            var idBytes = user.Id.ToByteArray();
+            var idBytes = userId.ToByteArray();
             var idString = Convert.ToBase64String(idBytes).PadRight(16, '=');
 
             // encode random number => 48 bytes = 64 characters in base64

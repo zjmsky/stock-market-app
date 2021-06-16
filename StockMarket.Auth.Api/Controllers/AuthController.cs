@@ -33,44 +33,29 @@ namespace StockMarket.Auth.Api.Controllers
         {
             var username = request.Username;
             var password = request.Password;
-            var ipAddress = GetIpAddress();
-            var response = await _authProvider.Authenticate(username, password, ipAddress);
-            if (response.IsSuccess())
-            {
-                var accessToken = response.AccessToken;
-                var refreshToken = response.RefreshToken;
-                var payload = new { accessToken, refreshToken };
-                return Ok(payload);
-            }
-            else
-            {
-                var error = response.Error;
-                var payload = new { error };
-                return BadRequest(payload);
-            }
+            var deviceId = request.DeviceId;
+            var result = await _authProvider.Authenticate(username, password, deviceId);
+            var payload = result.ToJson();
+            return result.IsSuccess() ? Ok(payload): BadRequest(payload);
         }
 
         [HttpPost("refresh")]
-        public async Task<ActionResult<AuthResponse>> Refresh([FromHeader] string refreshToken)
+        public async Task<ActionResult> Refresh([FromBody] RefreshRequest request)
         {
-            var ipAddress = GetIpAddress();
-            var response = await _authProvider.Refresh(refreshToken, ipAddress);
-            return response.IsSuccess() ? Ok(response) : BadRequest(response);
+            var refreshToken = request.RefreshToken;
+            var deviceId = request.DeviceId;
+            var result = await _authProvider.Refresh(refreshToken, deviceId);
+            var payload = result.ToJson();
+            return result.IsSuccess() ? Ok(payload) : BadRequest(payload);
         }
 
         [HttpPost("logout")]
-        public async Task<ActionResult> Logout([FromHeader] string refreshToken)
+        public async Task<ActionResult> Logout([FromBody] LogoutRequest request)
         {
-            var success = await _authProvider.Revoke(refreshToken);
+            var refreshToken = request.RefreshToken;
+            var deviceId = request.DeviceId;
+            var success = await _authProvider.Revoke(refreshToken, deviceId);
             return success ? Ok() : BadRequest();
-        }
-
-        private string GetIpAddress()
-        {
-            if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                return Request.Headers["X-Forwarded-For"][0];
-            else
-                return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
         }
     }
 }

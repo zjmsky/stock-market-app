@@ -6,14 +6,12 @@ namespace StockMarket.Auth.Api.Entities
     [BsonIgnoreExtraElements]
     public class RefreshTokenEntity
     {
-        public string Token { get; set; }
-        public string IpAddress { get; set; }
-        public DateTime ExpiresAt { get; set; }
+        public string Token;
+        public DateTime ExpiresAt;
 
-        public RefreshTokenEntity(string token, string ipAddress)
+        public RefreshTokenEntity(string token)
         {
             Token = token;
-            IpAddress = ipAddress;
             ExpiresAt = DateTime.UtcNow.AddDays(7);
         }
 

@@ -28,6 +28,7 @@ namespace StockMarket.Auth.Api
             services.AddOptions<DatabaseConfig>().Bind(Configuration.GetSection("Database"));
 
             services.AddSingleton<DatabaseContext>();
+            services.AddScoped<UserRepo>();
             services.AddScoped<AuthProvider>();
 
             services.AddAuthentication(options =>

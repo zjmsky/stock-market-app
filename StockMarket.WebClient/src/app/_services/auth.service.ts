@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
 import { tap } from "rxjs/operators";
+import { v4 as uuidv4 } from "uuid";
 
 import { environment } from "@env/environment";
 import { AuthUser } from "@root/_models/authuser";
@@ -10,6 +11,7 @@ import { AuthUser } from "@root/_models/authuser";
 export class AuthenticationService {
     private _currentUserSubject: BehaviorSubject<AuthUser | null>;
     private _http: HttpClient;
+    private _deviceId: string;
 
     public get currentUser(): AuthUser | null {
         return this._currentUserSubject.value;
@@ -19,11 +21,22 @@ export class AuthenticationService {
         const userItem = JSON.parse(localStorage.getItem("currentUser")!);
         this._currentUserSubject = new BehaviorSubject(userItem);
         this._http = http;
+        this._deviceId = this.getDeviceId();
+    }
+
+    public register(
+        username: string,
+        password: string,
+        email: string
+    ): Observable<void> {
+        const registerUrl = environment.apiUrl + "/auth/register";
+        const registerBody = { username, password, email };
+        return this._http.post<void>(registerUrl, registerBody);
     }
 
     public login(username: string, password: string): Observable<AuthUser> {
         const loginUrl = environment.apiUrl + "/auth/login";
-        const loginBody = { username, password };
+        const loginBody = { username, password, deviceId: this._deviceId };
         return this._http.post<AuthUser>(loginUrl, loginBody).pipe(
             tap((user) => {
                 localStorage.setItem("currentUser", JSON.stringify(user));
@@ -33,8 +46,10 @@ export class AuthenticationService {
     }
 
     public refresh(): Observable<object> {
+        const userObject = JSON.parse(localStorage.getItem("currentUser")!);
+        const refreshToken = userObject.refreshToken;
         const refreshUrl = environment.apiUrl + "/auth/refresh";
-        const refreshBody = JSON.parse(localStorage.getItem("currentUser")!);
+        const refreshBody = { refreshToken, deviceId: this._deviceId };
         return this._http.post<AuthUser>(refreshUrl, refreshBody).pipe(
             tap((user) => {
                 localStorage.setItem("currentUser", JSON.stringify(user));
@@ -44,13 +59,24 @@ export class AuthenticationService {
     }
 
     public logout(): Observable<object> {
+        const userObject = JSON.parse(localStorage.getItem("currentUser")!);
+        const refreshToken = userObject.refreshToken;
         const logoutUrl = environment.apiUrl + "/auth/logout";
-        const logoutBody = JSON.parse(localStorage.getItem("currentUser")!);
+        const logoutBody = { refreshToken, deviceId: this._deviceId };
         return this._http.post(logoutUrl, logoutBody).pipe(
             tap(() => {
                 localStorage.removeItem("currentUser");
                 this._currentUserSubject.next(null);
             })
         );
+    }
+
+    private getDeviceId(): string {
+        const deviceId = localStorage.getItem("deviceId");
+        if (deviceId !== null) return deviceId;
+
+        const newId = uuidv4();
+        localStorage.setItem("deviceId", newId);
+        return newId;
     }
 }
