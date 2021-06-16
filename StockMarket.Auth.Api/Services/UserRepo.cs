@@ -24,7 +24,8 @@ namespace StockMarket.Auth.Api.Services
 
         private async Task<bool> ReplaceOneUnchecked(UserEntity user)
         {
-            try { await _context.Users.InsertOneAsync(user); }
+            var username = user.Username;
+            try { await _context.Users.ReplaceOneAsync(u => u.Username == username, user); }
             catch (MongoWriteException) { return false; }
             return true;
         }

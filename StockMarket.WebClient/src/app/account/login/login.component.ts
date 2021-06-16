@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Router } from "@angular/router";
 import { FormGroup, FormBuilder } from "@angular/forms";
+import { AbstractControl } from "@angular/forms";
 import { Subject, of } from "rxjs";
 import { catchError, finalize, first, takeUntil, tap } from "rxjs/operators";
 
@@ -23,11 +24,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     public formError = "";
     public formLoading = false;
 
-    get username(): string | null {
-        return this.loginForm?.get("username")?.value;
+    get username(): AbstractControl | null {
+        return this.loginForm?.get("username")!;
     }
-    get password(): string | null {
-        return this.loginForm?.get("password")?.value;
+    get password(): AbstractControl | null {
+        return this.loginForm?.get("password")!;
     }
 
     constructor(
@@ -42,7 +43,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         if (this._authService.currentUser != null) {
-            this._router.navigateByUrl("/");
+            this._router.navigateByUrl("/dashboard");
         }
 
         this.loginForm = this._formBuilder.group({
@@ -60,7 +61,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         if (this.loginForm!.invalid) return;
         this.formLoading = true;
         this._authService
-            .login(this.username!, this.password!)
+            .login(this.username!.value, this.password!.value)
             .pipe(takeUntil(this.destroy$))
             .pipe(first())
             .pipe(tap((user) => this.handleLoginSuccess(user)))
@@ -70,7 +71,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     private handleLoginSuccess(user: AuthUser) {
-        this._router.navigateByUrl("/");
+        this._router.navigateByUrl("/dashboard");
     }
 
     private handleLoginError(error: any) {

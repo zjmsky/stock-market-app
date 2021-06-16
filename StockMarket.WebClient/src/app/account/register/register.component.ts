@@ -90,17 +90,17 @@ export class RegisterComponent implements OnInit, OnDestroy {
     public formError = "";
     public formLoading = false;
 
-    get email(): string | null {
-        return this.registerForm?.get("email")?.value;
+    get email(): AbstractControl | null {
+        return this.registerForm?.get("email")!;
     }
-    get username(): string | null {
-        return this.registerForm?.get("username")?.value;
+    get username(): AbstractControl | null {
+        return this.registerForm?.get("username")!;
     }
-    get password(): string | null {
-        return this.registerForm?.get("password")?.value;
+    get password(): AbstractControl | null {
+        return this.registerForm?.get("password")!;
     }
-    get passwordConfirm(): string | null {
-        return this.registerForm?.get("passwordConfirm")?.value;
+    get passwordConfirm(): AbstractControl | null {
+        return this.registerForm?.get("passwordConfirm")!;
     }
 
     constructor(
@@ -115,7 +115,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         if (this._authService.currentUser != null) {
-            this._router.navigateByUrl("/");
+            this._router.navigateByUrl("/dashboard");
         }
 
         this.registerForm = this._formBuilder.group({
@@ -141,7 +141,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
         if (this.registerForm!.invalid) return;
         this.formLoading = true;
         this._authService
-            .register(this.username!, this.password!, this.email!)
+            .register(this.username!.value, this.password!.value, this.email!.value)
             .pipe(takeUntil(this.destroy$))
             .pipe(first())
             .pipe(tap(() => this.handleRegisterSuccess()))

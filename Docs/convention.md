@@ -6,6 +6,8 @@
 - method names the same as corresponding http method
 - can perform only basic parameter validations
 - can transform data types to / from services
+- POST to create resources
+- PUT to update resources (replace)
 
 # entities
 - "Entity" suffix required (by convention)
