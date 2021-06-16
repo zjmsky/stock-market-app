@@ -77,7 +77,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         if (error.status === 400) {
             this.formError = "Incorrect username or password";
         } else {
-            this.formError = "Unknown error. Please try again.";
+            this.formError = "Unknown error. Please try again";
         }
     }
 }

@@ -1,6 +1,11 @@
-import { Component } from "@angular/core";
-import { FormGroup, FormControl, Validators } from "@angular/forms";
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Router } from "@angular/router";
+import { FormGroup, FormBuilder, Validators } from "@angular/forms";
 import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
+import { Subject, of } from "rxjs";
+import { catchError, finalize, first, takeUntil, tap } from "rxjs/operators";
+
+import { AuthenticationService } from "@root/_services/auth.service";
 
 class UsernameValidator {
     private static usernameInner(
@@ -69,38 +74,91 @@ class ConfirmValidator {
     }
 }
 
-const registerForm = new FormGroup({
-    email: new FormControl("", [Validators.required, Validators.email]),
-    username: new FormControl("", UsernameValidator.username(6, 20)),
-    password: new FormControl("", PasswordValidator.password(8, 20)),
-    passwordConfirm: new FormControl(
-        "",
-        ConfirmValidator.confirmField("password")
-    )
-});
-
-registerForm.controls.password.valueChanges.subscribe(() => {
-    registerForm.controls.passwordConfirm.updateValueAndValidity();
-});
-
 @Component({
     selector: "app-register",
     templateUrl: "./register.component.html",
     styleUrls: ["./register.component.css"]
 })
-export class RegisterComponent {
-    registerForm = registerForm;
+export class RegisterComponent implements OnInit, OnDestroy {
+    private _formBuilder: FormBuilder;
+    private _router: Router;
+    private _authService: AuthenticationService;
 
-    public get email() {
-        return this.registerForm.get("email") as AbstractControl;
+    private destroy$ = new Subject<void>();
+
+    public registerForm?: FormGroup;
+    public formError = "";
+    public formLoading = false;
+
+    get email(): string | null {
+        return this.registerForm?.get("email")?.value;
     }
-    get username() {
-        return this.registerForm.get("username") as AbstractControl;
+    get username(): string | null {
+        return this.registerForm?.get("username")?.value;
     }
-    get password() {
-        return this.registerForm.get("password") as AbstractControl;
+    get password(): string | null {
+        return this.registerForm?.get("password")?.value;
     }
-    get passwordConfirm() {
-        return this.registerForm.get("passwordConfirm") as AbstractControl;
+    get passwordConfirm(): string | null {
+        return this.registerForm?.get("passwordConfirm")?.value;
+    }
+
+    constructor(
+        formBuilder: FormBuilder,
+        router: Router,
+        authService: AuthenticationService
+    ) {
+        this._formBuilder = formBuilder;
+        this._router = router;
+        this._authService = authService;
+    }
+
+    ngOnInit(): void {
+        if (this._authService.currentUser != null) {
+            this._router.navigateByUrl("/");
+        }
+
+        this.registerForm = this._formBuilder.group({
+            email: ["", [Validators.required, Validators.email]],
+            username: ["", UsernameValidator.username(6, 20)],
+            password: ["", PasswordValidator.password(8, 20)],
+            passwordConfirm: ["", ConfirmValidator.confirmField("password")]
+        });
+
+        const confirmField = this.registerForm.controls.passwordConfirm;
+        this.registerForm.controls.password.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .pipe(tap(() => confirmField.updateValueAndValidity()))
+            .subscribe();
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    onSubmit(): void {
+        if (this.registerForm!.invalid) return;
+        this.formLoading = true;
+        this._authService
+            .register(this.username!, this.password!, this.email!)
+            .pipe(takeUntil(this.destroy$))
+            .pipe(first())
+            .pipe(tap(() => this.handleRegisterSuccess()))
+            .pipe(catchError((err) => of(this.handleRegisterFailure(err))))
+            .pipe(finalize(() => (this.formLoading = false)))
+            .subscribe();
+    }
+
+    private handleRegisterSuccess() {
+        this._router.navigateByUrl("/account/login");
+    }
+
+    private handleRegisterFailure(error: any) {
+        if (error.status === 400) {
+            this.formError = "Validation error";
+        } else {
+            this.formError = "Unknown error. Please try again";
+        }
     }
 }
