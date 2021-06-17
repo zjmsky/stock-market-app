@@ -25,13 +25,13 @@ namespace StockMarket.Company.Api
 
             services.AddSingleton<DatabaseContext>();
             services.AddSingleton<EventBus>();
-            services.AddSingleton<ExchangeSync>();
-            services.AddSingleton<SectorSync>();
+            services.AddScoped<SectorRepo>();
             services.AddScoped<CompanyRepo>();
             services.AddScoped<ListingRepo>();
+            services.AddSingleton<SectorSync>();
+            services.AddSingleton<ListingSync>();
 
             services.AddControllers();
-
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StockMarket.Company.Api", Version = "v1" }));
         }
@@ -42,8 +42,7 @@ namespace StockMarket.Company.Api
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "StockMarket.Company.Api v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "StockMarket.Company.Api v1"));
             }
 
             app.UseRouting();

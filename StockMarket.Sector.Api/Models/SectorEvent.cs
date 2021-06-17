@@ -1,39 +1,29 @@
 using EasyNetQ;
-using MongoDB.Bson;
 using StockMarket.Sector.Api.Entities;
 
 namespace StockMarket.Sector.Api.Models
 {
     [Queue("SectorIntegrationEvents")]
-    public interface ISectorIntegrationEvent
+    public class SectorIntegrationEvent
     {
-        string Id { get; set; }
-    }
+        string Type { get; set; }
+        string SectorCode { get; set; }
 
-    public class SectorCreationEvent : ISectorIntegrationEvent
-    {
-        public string Id { get; set; }
-        public string SectorCode { get; set; }
-
-        public static SectorCreationEvent FromEntity(SectorEntity sector)
+        public static SectorIntegrationEvent Update(SectorEntity sector)
         {
-            return new SectorCreationEvent
+            return new SectorIntegrationEvent
             {
-                Id = sector.Id.ToString(),
-                SectorCode = sector.SectorCode,
+                Type = "update",
+                SectorCode = sector.SectorCode
             };
         }
-    }
 
-    public class SectorDeletionEvent : ISectorIntegrationEvent
-    {
-        public string Id { get; set; }
-
-        public static SectorDeletionEvent FromId(ObjectId id)
+        public static SectorIntegrationEvent Delete(SectorEntity sector)
         {
-            return new SectorDeletionEvent
+            return new SectorIntegrationEvent
             {
-                Id = id.ToString(),
+                Type = "delete",
+                SectorCode = sector.SectorCode
             };
         }
     }

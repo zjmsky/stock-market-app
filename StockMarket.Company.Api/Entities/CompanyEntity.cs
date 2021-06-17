@@ -23,7 +23,7 @@ namespace StockMarket.Company.Api.Entities
 
         public string Turnover { get; set; } = String.Empty;
         public string CEO { get; set; } = String.Empty;
-        public List<string> Directors { get; set; }
+        public List<string> Directors { get; set; } = new List<string>();
 
         public CompanyEntity Sanitize()
         {

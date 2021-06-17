@@ -7,7 +7,7 @@ namespace StockMarket.Exchange.Api.Services
 {
     public class DatabaseContext
     {
-        public readonly IMongoCollection<ExchangeEntity> Exchange;
+        public readonly IMongoCollection<ExchangeEntity> Exchanges;
         public readonly IMongoCollection<ListingEntity> Listings;
 
         public DatabaseContext(IOptions<DatabaseConfig> config)
@@ -21,7 +21,7 @@ namespace StockMarket.Exchange.Api.Services
             var listingCollection = database.GetCollection<ListingEntity>("Listings");
             ListingCollectionManager.CreateIndex(listingCollection);
 
-            this.Exchange = exchangeCollection;
+            this.Exchanges = exchangeCollection;
             this.Listings = listingCollection;
         }
     }

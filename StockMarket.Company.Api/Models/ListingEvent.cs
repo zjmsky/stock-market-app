@@ -1,7 +1,7 @@
 using EasyNetQ;
-using StockMarket.Exchange.Api.Entities;
+using StockMarket.Company.Api.Entities;
 
-namespace StockMarket.Exchange.Api.Models
+namespace StockMarket.Company.Api.Models
 {
     [Queue("ListingIntegrationEvents")]
     public class ListingIntegrationEvent

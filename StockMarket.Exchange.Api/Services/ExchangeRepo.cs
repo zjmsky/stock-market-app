@@ -20,7 +20,8 @@ namespace StockMarket.Exchange.Api.Services
 
         private async Task<bool> ValidateReferences(ExchangeEntity exchange)
         {
-            // nothing for now
+            // exchange does not depend on any entity
+            // so nothing for now
             await Task.Yield();
             return true;
         }
@@ -38,7 +39,7 @@ namespace StockMarket.Exchange.Api.Services
 
         private async Task<bool> InsertOneUnchecked(ExchangeEntity exchange)
         {
-            try { await _context.Exchange.InsertOneAsync(exchange); }
+            try { await _context.Exchanges.InsertOneAsync(exchange); }
             catch (MongoWriteException) { return false; }
             return true;
         }
@@ -46,7 +47,7 @@ namespace StockMarket.Exchange.Api.Services
         private async Task<bool> ReplaceOneUnchecked(ExchangeEntity exchange)
         {
             var code = exchange.ExchangeCode;
-            try { await _context.Exchange.ReplaceOneAsync(e => e.ExchangeCode == code, exchange); }
+            try { await _context.Exchanges.ReplaceOneAsync(e => e.ExchangeCode == code, exchange); }
             catch (MongoWriteException) { return false; }
             return true;
         }
@@ -54,21 +55,21 @@ namespace StockMarket.Exchange.Api.Services
         private async Task<bool> DeleteOneUnchecked(ExchangeEntity exchange)
         {
             var code = exchange.ExchangeCode;
-            var result = await _context.Exchange.DeleteOneAsync(e => e.ExchangeCode == code);
+            var result = await _context.Exchanges.DeleteOneAsync(e => e.ExchangeCode == code);
             return result.DeletedCount > 0;
         }
 
-        private async Task<bool> PublishCreation(ExchangeEntity exchange)
+        private async Task<bool> PublishUpdation(ExchangeEntity exchange)
         {
-            var creationEvent = ExchangeCreationEvent.FromEntity(exchange);
-            await _events.Publish<IExchangeIntegrationEvent>(creationEvent);
+            var updationEvent = ExchangeIntegrationEvent.Update(exchange);
+            await _events.Publish<ExchangeIntegrationEvent>(updationEvent);
             return true;
         }
 
         private async Task<bool> PublishDeletion(ExchangeEntity exchange)
         {
-            var deletionEvent = ExchangeDeletionEvent.FromId(exchange.Id);
-            await _events.Publish<IExchangeIntegrationEvent>(deletionEvent);
+            var deletionEvent = ExchangeIntegrationEvent.Delete(exchange);
+            await _events.Publish<ExchangeIntegrationEvent>(deletionEvent);
             return true;
         }
 
@@ -77,7 +78,7 @@ namespace StockMarket.Exchange.Api.Services
             return exchange.Sanitize().Validate().Count == 0
                 && await ValidateReferences(exchange)
                 && await InsertOneUnchecked(exchange)
-                && await PublishCreation(exchange);
+                && await PublishUpdation(exchange);
         }
 
         public async Task<bool> ReplaceOne(ExchangeEntity exchange)
@@ -85,7 +86,7 @@ namespace StockMarket.Exchange.Api.Services
             return exchange.Sanitize().Validate().Count == 0
                 && await ValidateReferences(exchange)
                 && await ReplaceOneUnchecked(exchange)
-                && await PublishCreation(exchange);
+                && await PublishUpdation(exchange);
         }
 
         public async Task<bool> DeleteOne(string code)
@@ -102,8 +103,7 @@ namespace StockMarket.Exchange.Api.Services
             // ensure valid values
             page = Math.Max(page, 1);
             count = Math.Clamp(count, 1, 50);
-
-            return await _context.Exchange
+            return await _context.Exchanges
                 .Find(x => true)
                 .Skip((page - 1) * count)
                 .Limit(count)
@@ -112,8 +112,9 @@ namespace StockMarket.Exchange.Api.Services
 
         public async Task<ExchangeEntity> FindOneByCode(string code)
         {
-            code = code.ToUpper(); // case insensitive
-            return await _context.Exchange
+            // case insensitive
+            code = code.ToUpper();
+            return await _context.Exchanges
                 .Find(e => e.ExchangeCode == code)
                 .FirstOrDefaultAsync();
         }

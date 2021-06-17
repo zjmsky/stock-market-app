@@ -26,12 +26,12 @@ namespace StockMarket.Sector.Api
             services.AddSingleton<DatabaseContext>();
             services.AddSingleton<EventBus>();
             services.AddScoped<SectorRepo>();
+            services.AddScoped<CompanyRepo>();
+            services.AddSingleton<CompanySync>();
 
             services.AddControllers();
-            
             services.AddSwaggerGen(c =>
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "StockMarket.Sector.Api", Version = "v1" })
-            );
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "StockMarket.Sector.Api", Version = "v1" }));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

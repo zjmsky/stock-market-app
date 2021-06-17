@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using StockMarket.Exchange.Api.Models;
+using StockMarket.Company.Api.Models;
 
-namespace StockMarket.Exchange.Api.Services
+namespace StockMarket.Company.Api.Services
 {
     public class ListingSync
     {
@@ -10,7 +10,7 @@ namespace StockMarket.Exchange.Api.Services
         public ListingSync(ListingRepo repo, EventBus events)
         {
             _repo = repo;
-            events.Subscribe<ListingIntegrationEvent>("ExchangeApi", OnIntegrationEvent);
+            events.Subscribe<ListingIntegrationEvent>("CompanyApi", OnIntegrationEvent);
         }
 
         private async Task OnIntegrationEvent(ListingIntegrationEvent integrationEvent)

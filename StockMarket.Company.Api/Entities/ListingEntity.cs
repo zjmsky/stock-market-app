@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using MongoDB.Driver;
 using MongoDB.Bson;
@@ -17,36 +16,11 @@ namespace StockMarket.Company.Api.Entities
         public string TickerSymbol { get; set; } = String.Empty;
         public string CompanyCode { get; set; } = String.Empty;
 
-        public ListingEntity Sanitize()
-        {
-            return this;
-        }
-
-        public Dictionary<string, string> Validate()
-        {
-            var result = new Dictionary<string, string>();
-
-            if (ExchangeCode.Length == 0)
-                result.Add("exchangeCode", "required");
-
-            if (TickerSymbol.Length == 0)
-                result.Add("tickerSymbol", "required");
-
-            if (CompanyCode.Length == 0)
-                result.Add("companyCode", "required");
-
-            return result;
-        }
-
-        public bool IsSimilar(ListingEntity other)
-        {
-            return ExchangeCode == other.ExchangeCode && TickerSymbol == other.TickerSymbol;
-        }
-
-        public bool IsSimilar(string exchangeCode, string ticker)
-        {
-            return ExchangeCode == exchangeCode && TickerSymbol == ticker;
-        }
+        public bool IsMatch(ListingEntity other) =>
+            ExchangeCode == other.ExchangeCode && TickerSymbol == other.TickerSymbol;
+        
+        public bool IsMatch(string exchangeCode, string ticker) =>
+            ExchangeCode == exchangeCode && TickerSymbol == ticker;
     }
 
     public static class ListingCollectionManager

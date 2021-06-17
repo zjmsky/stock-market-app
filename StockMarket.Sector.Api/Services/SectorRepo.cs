@@ -18,66 +18,105 @@ namespace StockMarket.Sector.Api.Services
             _events = events;
         }
 
-        public async Task<bool> InsertOrReplaceOne(SectorEntity sector)
+        private async Task<bool> ValidateReferences(SectorEntity sector)
         {
-            // sanitize and validate sector model
-            var validationErrors = sector.Sanitize().Validate();
-            if (validationErrors.Count > 0) return false;
-    
-            // check if entry exists already
-            var sectorExists = await _context.Sector
-                .Find(e => e.SectorCode == sector.SectorCode)
+            // sector does not depend on any entity
+            // so nothing for now
+            await Task.Yield();
+            return true;
+        }
+
+        private async Task<bool> AssertNoReferences(SectorEntity sector)
+        {
+            // assert no reference in company collection
+            var companyExists = await _context.Companies
+                .Find(c => c.SectorCode == sector.SectorCode)
                 .AnyAsync();
-
-            if (!sectorExists)
-            {
-                // try inserting sector model
-                // this fails if any constraint is violated
-                try { await _context.Sector.InsertOneAsync(sector); }
-                catch (MongoWriteException) { return false; }
-            }
-            else
-            {
-                // try replacing sector model
-                // this fails if any constraint is violated
-                var code = sector.SectorCode;
-                try { await _context.Sector.ReplaceOneAsync(e => e.SectorCode == code, sector); }
-                catch (MongoWriteException) { return false; }
-            }
-
-            // broadcast sector creation event
-            var creationEvent = SectorCreationEvent.FromEntity(sector);
-            await _events.Publish<ISectorIntegrationEvent>(creationEvent);
+            if (companyExists) return false;
 
             return true;
+        }
+
+        private async Task<bool> InsertOneUnchecked(SectorEntity sector)
+        {
+            try { await _context.Sectors.InsertOneAsync(sector); }
+            catch (MongoWriteException) { return false; }
+            return true;
+        }
+
+        private async Task<bool> ReplaceOneUnchecked(SectorEntity sector)
+        {
+            var code = sector.SectorCode;
+            try { await _context.Sectors.ReplaceOneAsync(e => e.SectorCode == code, sector); }
+            catch (MongoWriteException) { return false; }
+            return true;
+        }
+
+        private async Task<bool> DeleteOneUnchecked(SectorEntity sector)
+        {
+            var code = sector.SectorCode;
+            var result = await _context.Sectors.DeleteOneAsync(e => e.SectorCode == code);
+            return result.DeletedCount > 0;
+        }
+
+        private async Task<bool> PublishUpdation(SectorEntity sector)
+        {
+            var updationEvent = SectorIntegrationEvent.Update(sector);
+            await _events.Publish<SectorIntegrationEvent>(updationEvent);
+            return true;
+        }
+
+        private async Task<bool> PublishDeletion(SectorEntity sector)
+        {
+            var deletionEvent = SectorIntegrationEvent.Delete(sector);
+            await _events.Publish<SectorIntegrationEvent>(deletionEvent);
+            return true;
+        }
+
+        public async Task<bool> InsertOne(SectorEntity sector)
+        {
+            return sector.Sanitize().Validate().Count == 0
+                && await ValidateReferences(sector)
+                && await InsertOneUnchecked(sector)
+                && await PublishUpdation(sector);
+        }
+
+        public async Task<bool> ReplaceOne(SectorEntity sector)
+        {
+            return sector.Sanitize().Validate().Count == 0
+                && await ValidateReferences(sector)
+                && await ReplaceOneUnchecked(sector)
+                && await PublishUpdation(sector);
         }
 
         public async Task<bool> DeleteOne(string code)
         {
-            // delete sector from database
-            var dbSector = await _context.Sector.FindOneAndDeleteAsync(e => e.SectorCode == code);
-            if (dbSector == null) return false;
-
-            // broadcast sector deletion event
-            var deletionEvent = SectorDeletionEvent.FromId(dbSector.Id);
-            await _events.Publish<ISectorIntegrationEvent>(deletionEvent);
-
-            return true;
+            var sector = await FindOneByCode(code);
+            return sector != null
+                && await AssertNoReferences(sector)
+                && await DeleteOneUnchecked(sector)
+                && await PublishDeletion(sector);
         }
 
         public async Task<List<SectorEntity>> Enumerate(int page = 1, int count = 10)
         {
+            // ensure valid values
             page = Math.Max(page, 1);
-            count = Math.Clamp(count, 1, 25);
-            // TODO: add pagination feature
-            var dbSectorList = await _context.Sector.Find(x => true).ToListAsync();
-            return dbSectorList;
+            count = Math.Clamp(count, 1, 50);
+            return await _context.Sectors
+                .Find(x => true)
+                .Skip((page - 1) * count)
+                .Limit(count)
+                .ToListAsync();
         }
 
         public async Task<SectorEntity> FindOneByCode(string code)
         {
-            var dbSector = await _context.Sector.Find(e => e.SectorCode == code).FirstOrDefaultAsync();
-            return dbSector;
+            // case insensitive
+            code = code.ToUpper();
+            return await _context.Sectors
+                .Find(s => s.SectorCode == code)
+                .FirstOrDefaultAsync();
         }
     }
 }

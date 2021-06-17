@@ -1,39 +1,29 @@
 using EasyNetQ;
-using MongoDB.Bson;
 using StockMarket.Exchange.Api.Entities;
 
 namespace StockMarket.Exchange.Api.Models
 {
     [Queue("ExchangeIntegrationEvents")]
-    public interface IExchangeIntegrationEvent
+    public class ExchangeIntegrationEvent
     {
-        string Id { get; set; }
-    }
+        string Type { get; set; }
+        string ExchangeCode { get; set; }
 
-    public class ExchangeCreationEvent : IExchangeIntegrationEvent
-    {
-        public string Id { get; set; }
-        public string ExchangeCode { get; set; }
-
-        public static ExchangeCreationEvent FromEntity(ExchangeEntity exchange)
+        public static ExchangeIntegrationEvent Update(ExchangeEntity exchange)
         {
-            return new ExchangeCreationEvent
+            return new ExchangeIntegrationEvent
             {
-                Id = exchange.Id.ToString(),
-                ExchangeCode = exchange.ExchangeCode,
+                Type = "update",
+                ExchangeCode = exchange.ExchangeCode
             };
         }
-    }
 
-    public class ExchangeDeletionEvent : IExchangeIntegrationEvent
-    {
-        public string Id { get; set; }
-
-        public static ExchangeDeletionEvent FromId(ObjectId id)
+        public static ExchangeIntegrationEvent Delete(ExchangeEntity exchange)
         {
-            return new ExchangeDeletionEvent
+            return new ExchangeIntegrationEvent
             {
-                Id = id.ToString()
+                Type = "delete",
+                ExchangeCode = exchange.ExchangeCode
             };
         }
     }

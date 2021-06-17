@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -14,12 +15,12 @@ namespace StockMarket.Exchange.Api.Entities
         [JsonIgnore]
         public ObjectId Id { get; set; }
 
-        public string ExchangeCode { get; set; }
-        public string CountryCode { get; set; }
+        public string ExchangeCode { get; set; } = String.Empty;
+        public string CountryCode { get; set; } = String.Empty;
 
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public AddressEntity Address { get; set; }
+        public string Name { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
+        public AddressEntity Address { get; set; } = null;
 
         public ExchangeEntity Sanitize()
         {

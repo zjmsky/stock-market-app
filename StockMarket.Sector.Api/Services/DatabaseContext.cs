@@ -7,7 +7,8 @@ namespace StockMarket.Sector.Api.Services
 {
     public class DatabaseContext
     {
-        public readonly IMongoCollection<SectorEntity> Sector;
+        public readonly IMongoCollection<SectorEntity> Sectors;
+        public readonly IMongoCollection<CompanyEntity> Companies;
 
         public DatabaseContext(IOptions<DatabaseConfig> config)
         {
@@ -17,7 +18,11 @@ namespace StockMarket.Sector.Api.Services
             var sectorCollection = database.GetCollection<SectorEntity>("Sectors");
             SectorCollectionManager.CreateIndex(sectorCollection);
 
-            this.Sector = sectorCollection;
+            var companyCollection = database.GetCollection<CompanyEntity>("Companies");
+            CompanyCollectionManager.CreateIndex(companyCollection);
+
+            this.Sectors = sectorCollection;
+            this.Companies = companyCollection;
         }
     }
 }

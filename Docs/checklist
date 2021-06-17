@@ -1,35 +1,9 @@
-Auth.Api
-------------
-☓ passes integration tests
-✓ registered in gateway
-✓ follows convention
-☓ dependencies up-to-date
-
-Sector.Api
-------------
-☓ passes integration tests
-☓ registered in gateway
-☓ follows convention
-☓ dependencies up-to-date
-
-Exchange.Api
-------------
-☓ passes integration tests
-☓ registered in gateway
-☓ follows convention
-☓ dependencies up-to-date
-
-Company.Api
-------------
-☓ passes integration tests
-☓ registered in gateway
-☓ follows convention
-☓ dependencies up-to-date
-
-Listing.Api
-------------
-☓ passes integration tests
-☓ registered in gateway
-☓ follows convention
-☓ dependencies up-to-date
-
+┌──────────────────────────┬──────┬──────┬──────┬──────┬──────┐
+│                          │ auth │ exch │ sect │ comp │ list │
+├──────────────────────────┼──────┼──────┼──────┼──────┼──────┤
+│ passed integration tests │  x   │  x   │  x   │  x   │  x   │
+├──────────────────────────┼──────┼──────┼──────┼──────┼──────┤
+│ follows convention       │  o   │  o   │  o   │  o   │  x   │
+├──────────────────────────┼──────┼──────┼──────┼──────┼──────┤
+│ dependencies up-to-date  │  x   │  x   │  x   │  x   │  x   │
+└──────────────────────────┴──────┴──────┴──────┴──────┴──────┘

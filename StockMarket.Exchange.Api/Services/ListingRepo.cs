@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using StockMarket.Company.Api.Entities;
+using StockMarket.Exchange.Api.Entities;
 
-namespace StockMarket.Company.Api.Services
+namespace StockMarket.Exchange.Api.Services
 {
     public class ListingRepo
     {

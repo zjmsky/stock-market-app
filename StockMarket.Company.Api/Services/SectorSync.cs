@@ -1,45 +1,36 @@
 using System.Threading.Tasks;
-using MongoDB.Driver;
 using StockMarket.Company.Api.Models;
 
 namespace StockMarket.Company.Api.Services
 {
     public class SectorSync
     {
-        private readonly DatabaseContext _context;
+        private readonly SectorRepo _repo;
 
-        public SectorSync(DatabaseContext context, EventBus events)
+        public SectorSync(SectorRepo repo, EventBus events)
         {
-            _context = context;
-            events.Subscribe<ISectorIntegrationEvent>("CompanyApi", OnIntegrationEvent);
+            _repo = repo;
+            events.Subscribe<SectorIntegrationEvent>("CompanyApi", OnIntegrationEvent);
         }
 
-        private async Task OnIntegrationEvent(ISectorIntegrationEvent integrationEvent)
+        private async Task OnIntegrationEvent(SectorIntegrationEvent integrationEvent)
         {
-            var creationEvent = integrationEvent as SectorCreationEvent;
-            var deletionEvent = integrationEvent as SectorDeletionEvent;
-
-            if (creationEvent != null)
-                await OnCreationEvent(creationEvent);
-            else if (deletionEvent != null)
-                await OnDeletionEvent(deletionEvent);
+            if (integrationEvent.IsUpdationEvent())
+                await OnUpdationEvent(integrationEvent);
+            else if (integrationEvent.IsDeletionEvent())
+                await OnDeletionEvent(integrationEvent);
         }
 
-        private async Task OnCreationEvent(SectorCreationEvent creationEvent)
+        private async Task OnUpdationEvent(SectorIntegrationEvent updationEvent)
         {
-            var sector = creationEvent.ToEntity();
-            var exists = await _context.Sectors.Find(s => s.Id == sector.Id).AnyAsync();
-
-            if (!exists)
-                await _context.Sectors.InsertOneAsync(sector);
-            else
-                await _context.Sectors.ReplaceOneAsync(s => s.Id == sector.Id, sector);
+            var sector = updationEvent.ToEntity();
+            await _repo.InsertOrReplaceOneUnchecked(sector);
         }
 
-        private async Task OnDeletionEvent(SectorDeletionEvent deletionEvent)
+        private async Task OnDeletionEvent(SectorIntegrationEvent deletionEvent)
         {
-            var sectorId = deletionEvent.ToId();
-            await _context.Sectors.DeleteOneAsync(s => s.Id == sectorId);
+            var sector = await _repo.FindOneByCode(deletionEvent.SectorCode);
+            await _repo.DeleteOneUnchecked(sector);
         }
     }
 }

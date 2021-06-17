@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using StockMarket.Company.Api.Entities;
 using StockMarket.Company.Api.Services;
@@ -7,14 +6,23 @@ using StockMarket.Company.Api.Services;
 namespace StockMarket.Company.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class ExchangeController : ControllerBase
+    [Route("[controller]")]
+    public class CompanyController : ControllerBase
     {
         private readonly CompanyRepo _repo;
 
-        public ExchangeController(CompanyRepo repo)
+        public CompanyController(CompanyRepo repo)
         {
             _repo = repo;
+        }
+
+        [HttpPost]
+        [Route("{code}")]
+        public async Task<ActionResult> Post(string code, [FromBody] CompanyEntity company)
+        {
+            company.CompanyCode = code; // ensure consistency
+            var success = await _repo.InsertOne(company);
+            return success ? Ok() : BadRequest();
         }
 
         [HttpPut]
@@ -22,9 +30,8 @@ namespace StockMarket.Company.Api.Controllers
         public async Task<ActionResult> Put(string code, [FromBody] CompanyEntity company)
         {
             company.CompanyCode = code; // ensure consistency
-            var success = await _repo.InsertOrReplaceOne(company);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
+            var success = await _repo.ReplaceOne(company);
+            return success ? Ok() : BadRequest();
         }
 
         [HttpDelete]
@@ -32,24 +39,14 @@ namespace StockMarket.Company.Api.Controllers
         public async Task<ActionResult> Delete(string code)
         {
             var success = await _repo.DeleteOne(code);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
+            return success ? Ok() : BadRequest();
         }
 
         [HttpGet]
-        public async Task<ActionResult> Get([FromQuery] int page, [FromQuery] int count)
+        public async Task<ActionResult> Get([FromQuery] int page = 1, [FromQuery] int count = 10)
         {
             var companyList = await _repo.Enumerate(page, count);
-            var payload = new { page = page, count = companyList.Count, companies = companyList };
-            return Ok(payload);
-        }
-
-        [HttpGet]
-        [Route("{exchange}:{ticker}")]
-        public async Task<ActionResult> Get(string exchange, string ticker)
-        {
-            var company = await _repo.FindOneByTicker(ticker, exchange);
-            return company != null ? Ok(company) : NotFound(null);
+            return Ok(companyList);
         }
 
         [HttpGet]
@@ -57,7 +54,7 @@ namespace StockMarket.Company.Api.Controllers
         public async Task<ActionResult> Get(string code)
         {
             var company = await _repo.FindOneByCode(code);
-            return company != null ? Ok(company) : NotFound(null);
+            return company != null ? Ok(company) : NotFound();
         }
     }
 }

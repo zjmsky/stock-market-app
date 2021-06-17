@@ -7,7 +7,6 @@ namespace StockMarket.Company.Api.Services
 {
     public class DatabaseContext
     {
-        public readonly IMongoCollection<ExchangeEntity> Exchanges;
         public readonly IMongoCollection<SectorEntity> Sectors;
         public readonly IMongoCollection<CompanyEntity> Companies;
         public readonly IMongoCollection<ListingEntity> Listings;
@@ -19,10 +18,7 @@ namespace StockMarket.Company.Api.Services
             var client = new MongoClient(configVal.ConnectionString);
             var database = client.GetDatabase(configVal.DatabaseName);
 
-            var exchangeCollection = database.GetCollection<ExchangeEntity>("Exchanges");
-            ExchangeCollectionManager.CreateIndex(exchangeCollection);
-
-            var sectorCollection = database.GetCollection<SectorEntity>("Companies");
+            var sectorCollection = database.GetCollection<SectorEntity>("Sectors");
             SectorCollectionManager.CreateIndex(sectorCollection);
 
             var companyCollection = database.GetCollection<CompanyEntity>("Companies");
@@ -31,7 +27,6 @@ namespace StockMarket.Company.Api.Services
             var listingCollection = database.GetCollection<ListingEntity>("Listings");
             ListingCollectionManager.CreateIndex(listingCollection);
             
-            this.Exchanges = exchangeCollection;
             this.Sectors = sectorCollection;
             this.Companies = companyCollection;
             this.Listings = listingCollection;

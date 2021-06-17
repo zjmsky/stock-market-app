@@ -1,37 +1,33 @@
 using EasyNetQ;
-using MongoDB.Bson;
 using StockMarket.Company.Api.Entities;
 
 namespace StockMarket.Company.Api.Models
 {
     [Queue("CompanyIntegrationEvents")]
-    public interface ICompanyIntegrationEvent
+    public class CompanyIntegrationEvent
     {
-        string Id { get; set; }
-    }
-
-    public class CompanyCreationEvent : ICompanyIntegrationEvent
-    {
-        public string Id { get; set; }
-        public string CompanyCode { get; set; }
-
-        public static CompanyCreationEvent FromEntity(CompanyEntity company)
+        string Type { get; set; }
+        string CompanyCode { get; set; }
+        string SectorCode { get; set; }
+        
+        public static CompanyIntegrationEvent Update(CompanyEntity company)
         {
-            return new CompanyCreationEvent
+            return new CompanyIntegrationEvent
             {
-                Id = company.Id.ToString(),
+                Type = "update",
                 CompanyCode = company.CompanyCode,
+                SectorCode = company.SectorCode
             };
         }
-    }
 
-    public class CompanyDeletionEvent : ICompanyIntegrationEvent
-    {
-        public string Id { get; set; }
-
-        public static CompanyDeletionEvent FromId(ObjectId id)
+        public static CompanyIntegrationEvent Delete(CompanyEntity company)
         {
-            return new CompanyDeletionEvent { Id = id.ToString() };
+            return new CompanyIntegrationEvent
+            {
+                Type = "delete",
+                CompanyCode = company.CompanyCode,
+                SectorCode = company.SectorCode
+            };
         }
     }
 }
