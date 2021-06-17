@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using StockMarket.Exchange.Api.Services;
 using StockMarket.Exchange.Api.Entities;
@@ -7,7 +6,7 @@ using StockMarket.Exchange.Api.Entities;
 namespace StockMarket.Exchange.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ExchangeController : ControllerBase
     {
         private readonly ExchangeRepo _repo;
@@ -17,14 +16,22 @@ namespace StockMarket.Exchange.Api.Controllers
             _repo = repo;
         }
 
+        [HttpPost]
+        [Route("{code}")]
+        public async Task<ActionResult> Post(string code, [FromBody] ExchangeEntity exchange)
+        {
+            exchange.ExchangeCode = code; // ensure consistency
+            var success = await _repo.InsertOne(exchange);
+            return success ? Ok() : BadRequest();
+        }
+
         [HttpPut]
         [Route("{code}")]
         public async Task<ActionResult> Put(string code, [FromBody] ExchangeEntity exchange)
         {
             exchange.ExchangeCode = code; // ensure consistency
-            var success = await _repo.InsertOrReplaceOne(exchange);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
+            var success = await _repo.ReplaceOne(exchange);
+            return success ? Ok() : BadRequest();
         }
 
         [HttpDelete]
@@ -32,24 +39,22 @@ namespace StockMarket.Exchange.Api.Controllers
         public async Task<ActionResult> Delete(string code)
         {
             var success = await _repo.DeleteOne(code);
-            var payload = new { success };
-            return success ? Ok(payload) : BadRequest(payload);
+            return success ? Ok() : BadRequest();
         }
 
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] int page = 1, [FromQuery] int count = 10)
         {
             var exchangeList = await _repo.Enumerate(page, count);
-            var payload = new { page, count = exchangeList.Count, exchanges = exchangeList };
-            return Ok(payload);
+            return Ok(exchangeList);
         }
 
         [HttpGet]
         [Route("{code}")]
         public async Task<ActionResult> Get(string code)
         {
-            var exchange = await _repo.FindOneByCode(code.ToUpper());
-            return exchange != null ? Ok(exchange) : NotFound(null);
+            var exchange = await _repo.FindOneByCode(code);
+            return exchange != null ? Ok(exchange) : NotFound();
         }
     }
 }

@@ -1,14 +1,32 @@
 ﻿{
     "$schema": "http://json.schemastore.org/launchsettings.json",
     "profiles": {
-        "StockMarket.Exchange.Api": {
+        "Development": {
             "commandName": "Project",
             "dotnetRunMessages": "true",
             "launchBrowser": true,
             "launchUrl": "swagger",
-            "applicationUrl": "http://localhost:5010",
+            "applicationUrl": "http://localhost:5011",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        "Testing": {
+            "commandName": "Project",
+            "dotnetRunMessages": "true",
+            "launchBrowser": false,
+            "applicationUrl": "http://localhost:5011",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Testing"
+            }
+        },
+        "Production": {
+            "commandName": "Project",
+            "dotnetRunMessages": "true",
+            "launchBrowser": false,
+            "applicationUrl": "http://localhost:5011",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Production"
             }
         }
     }

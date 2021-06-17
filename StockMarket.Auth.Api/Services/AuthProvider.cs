@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Claims;
@@ -39,13 +38,13 @@ namespace StockMarket.Auth.Api.Services
                 return AuthResult.Failure("unverified user");
 
             var refreshToken = GenerateRefreshToken(user.Id);
-            user.RefreshTokens[deviceId] = new RefreshTokenEntity(refreshToken);
-
-            var accessToken = GenerateAccessToken(user);
-
-            RevokeExpiredTokens(user);
+            user.RefreshTokens.RemoveAll(r => r.DeviceId == deviceId);
+            user.RefreshTokens.RemoveAll(r => r.HasExpired());
+            user.RefreshTokens.Add(new RefreshTokenEntity(deviceId, refreshToken));
             if (await _repo.ReplaceOne(user) == false)
                 return AuthResult.Failure("unknown error");
+
+            var accessToken = GenerateAccessToken(user);
 
             return AuthResult.Success(accessToken, refreshToken);
         }
@@ -56,15 +55,15 @@ namespace StockMarket.Auth.Api.Services
             var user = await _repo.FindOnyById(userId);
             if (user == null)
                 return AuthResult.Failure("invalid user");
-            else if (user.RefreshTokens.ContainsKey(deviceId) == false)
-                return AuthResult.Failure("invalid token");
 
-            var storedToken = user.RefreshTokens[deviceId];
-            if (storedToken.HasExpired())
-                return AuthResult.Failure("invalid token");
+            var storedToken = user.RefreshTokens.Find(r => r.DeviceId == deviceId);
+            if (storedToken == null)
+                return AuthResult.Failure("invalid device");
+            else if (storedToken.HasExpired())
+                return AuthResult.Failure("expired token");
             else if (storedToken.Token != refreshToken)
                 return AuthResult.Failure("invalid token");
-            
+
             var accessToken = GenerateAccessToken(user);
 
             return AuthResult.Success(accessToken, refreshToken);
@@ -75,21 +74,8 @@ namespace StockMarket.Auth.Api.Services
             var userId = GetUserIdFromToken(refreshToken);
             var user = await _repo.FindOnyById(userId);
             return user != null
-                && user.RefreshTokens.Remove(deviceId)
+                && user.RefreshTokens.RemoveAll(r => r.DeviceId == deviceId) > 0
                 && await _repo.ReplaceOne(user);
-        }
-
-        private bool RevokeExpiredTokens(UserEntity user)
-        {
-            var updatedTokens = user.RefreshTokens
-                .Where(p => p.Value.HasExpired())
-                .ToDictionary(p => p.Key, p => p.Value);
-            
-            if (updatedTokens.Count == user.RefreshTokens.Count)
-                return false;
-            
-            user.RefreshTokens = updatedTokens;
-            return true;
         }
 
         private string GenerateAccessToken(UserEntity user)

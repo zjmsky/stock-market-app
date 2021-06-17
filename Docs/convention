@@ -1,7 +1,9 @@
-# global
+global
+-----------
 - "Async" suffixes only when there is a sync counterpart
 
-# controllers
+controllers
+-----------
 - "Controller" suffix required
 - method names the same as corresponding http method
 - can perform only basic parameter validations
@@ -9,17 +11,20 @@
 - POST to create resources
 - PUT to update resources (replace)
 
-# entities
-- "Entity" suffix required (by convention)
+entities
+-----------
+- "Entity" suffix required
 - have sanitize and validate methods
 - use "CollectionManager" for collection properties
 
-# models
+models
+-----------
 - "Model" suffix not required
 - config type definitions have "Config" suffixes
 - event type definitions have "Event" suffixes
 - event names can be noun only (use creationEvent, not createdEvent)
 
-# services
+services
+-----------
 - "Service" suffix not required
 - configurations passed by IOptions and Config models

@@ -36,25 +36,18 @@ namespace StockMarket.Exchange.Api.Services
             return true;
         }
 
-        private async Task<bool> InsertOrReplaceOneUnchecked(ExchangeEntity exchange)
+        private async Task<bool> InsertOneUnchecked(ExchangeEntity exchange)
+        {
+            try { await _context.Exchange.InsertOneAsync(exchange); }
+            catch (MongoWriteException) { return false; }
+            return true;
+        }
+
+        private async Task<bool> ReplaceOneUnchecked(ExchangeEntity exchange)
         {
             var code = exchange.ExchangeCode;
-            var exchangeExists = await _context.Exchange
-                .Find(e => e.ExchangeCode == code)
-                .AnyAsync();
-
-            try
-            {
-                if (!exchangeExists)
-                    await _context.Exchange.InsertOneAsync(exchange);
-                else
-                    await _context.Exchange.ReplaceOneAsync(e => e.ExchangeCode == code, exchange);
-            }
-            catch (MongoWriteException)
-            {
-                return false;
-            }
-
+            try { await _context.Exchange.ReplaceOneAsync(e => e.ExchangeCode == code, exchange); }
+            catch (MongoWriteException) { return false; }
             return true;
         }
 
@@ -79,11 +72,19 @@ namespace StockMarket.Exchange.Api.Services
             return true;
         }
 
-        public async Task<bool> InsertOrReplaceOne(ExchangeEntity exchange)
+        public async Task<bool> InsertOne(ExchangeEntity exchange)
         {
             return exchange.Sanitize().Validate().Count == 0
                 && await ValidateReferences(exchange)
-                && await InsertOrReplaceOneUnchecked(exchange)
+                && await InsertOneUnchecked(exchange)
+                && await PublishCreation(exchange);
+        }
+
+        public async Task<bool> ReplaceOne(ExchangeEntity exchange)
+        {
+            return exchange.Sanitize().Validate().Count == 0
+                && await ValidateReferences(exchange)
+                && await ReplaceOneUnchecked(exchange)
                 && await PublishCreation(exchange);
         }
 
@@ -102,15 +103,19 @@ namespace StockMarket.Exchange.Api.Services
             page = Math.Max(page, 1);
             count = Math.Clamp(count, 1, 50);
 
-            // TODO: implement pagination
-            var dbExchangeList = await _context.Exchange.Find(x => true).ToListAsync();
-            return dbExchangeList;
+            return await _context.Exchange
+                .Find(x => true)
+                .Skip((page - 1) * count)
+                .Limit(count)
+                .ToListAsync();
         }
 
         public async Task<ExchangeEntity> FindOneByCode(string code)
         {
-            var dbExchange = await _context.Exchange.Find(e => e.ExchangeCode == code).FirstOrDefaultAsync();
-            return dbExchange;
+            code = code.ToUpper(); // case insensitive
+            return await _context.Exchange
+                .Find(e => e.ExchangeCode == code)
+                .FirstOrDefaultAsync();
         }
     }
 }

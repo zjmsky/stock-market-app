@@ -25,7 +25,7 @@ namespace StockMarket.Auth.Api.Entities
         public string Email { get; set; }
         public bool IsVerified { get; set; }
 
-        public Dictionary<string, RefreshTokenEntity> RefreshTokens { get; set; }
+        public List<RefreshTokenEntity> RefreshTokens { get; set; }
 
         public static UserEntity General(string username, string password, string email)
         {
@@ -36,7 +36,7 @@ namespace StockMarket.Auth.Api.Entities
                 Role = UserRole.General,
                 Email = email,
                 IsVerified = false,
-                RefreshTokens = new Dictionary<string, RefreshTokenEntity>()
+                RefreshTokens = new List<RefreshTokenEntity>()
             };
         }
 
