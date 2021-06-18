@@ -25,8 +25,8 @@ namespace StockMarket.Exchange.Api
 
             services.AddSingleton<DatabaseContext>();
             services.AddSingleton<EventBus>();
-            services.AddScoped<ExchangeRepo>();
-            services.AddScoped<ListingRepo>();
+            services.AddSingleton<ExchangeRepo>();
+            services.AddSingleton<ListingRepo>();
             services.AddSingleton<ListingSync>();
 
             services.AddControllers();
