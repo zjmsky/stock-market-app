@@ -9,7 +9,6 @@ import { AuthenticationService } from "@root/_services/auth.service";
 import { AuthUser } from "@root/_models/authuser";
 
 @Component({
-    selector: "app-login",
     templateUrl: "./login.component.html",
     styleUrls: ["./login.component.css"]
 })
