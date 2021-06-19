@@ -6,9 +6,14 @@
 /StockMarket.*.Api/bin/
 /StockMarket.*.Api/obj/
 /StockMarket.*.Api/Migrations/
+/StockMarket.*.Test/bin/
+/StockMarket.*.Test/obj/
 
 # log files
 /.logs/
+
+# local database
+/.data/
 
 # editor files
 /**/.vscode/

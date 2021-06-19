@@ -24,7 +24,7 @@ namespace StockMarket.Exchange.Api.Entities
 
         public ExchangeEntity Sanitize()
         {
-            Address.Sanitize();
+            if (Address != null) Address.Sanitize();
             return this;
         }
 
@@ -38,7 +38,9 @@ namespace StockMarket.Exchange.Api.Entities
             if (Regex.IsMatch(CountryCode, @"^[A-Z]{2}$") == false)
                 result.Add("countryCode", "invalid");
 
-            Address.Validate().ToList().ForEach(r => result.Add($"address.{r.Key}", r.Value));
+            if (Address != null)
+                Address.Validate().ToList()
+                    .ForEach(r => result.Add($"address.{r.Key}", r.Value));
 
             return result;
         }

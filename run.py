@@ -71,12 +71,12 @@ def restore_dir(function):
         return result
     return inner
 
-@restore_dir
 @register_process
-def start_process(name: str, path: str, *args: list):
+def start_process(name: str, *args):
     logfile = open(f'./.logs/{name}.log', 'a')
     OPEN_FILES.append(logfile)
-    return subprocess.Popen(path, *args, stdout=logfile, stderr=subprocess.STDOUT)
+    args = ' '.join(args).split()
+    return subprocess.Popen(args, stdout=logfile, stderr=subprocess.STDOUT)
 
 @restore_dir
 @register_process
@@ -96,10 +96,6 @@ def main():
     args = parse_args()
 
     register_signals()
-
-    # dependencies
-    start_process('mongod', '--config=Infrastructure/mongod.conf')
-    start_process('rabbitmq-server', '--config=Infrastructure/rabbitmq.conf')
 
     # api microservices
     start_dotnet_project("auth.api", 'StockMarket.Auth.Api', args.profile)
