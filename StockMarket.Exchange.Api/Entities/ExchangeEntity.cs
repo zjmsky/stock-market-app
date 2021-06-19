@@ -57,5 +57,49 @@ namespace StockMarket.Exchange.Api.Entities
             var codeModel = new CreateIndexModel<ExchangeEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
+
+        public static void Seed(IMongoCollection<ExchangeEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new ExchangeEntity
+                {
+                    ExchangeCode = "IS",
+                    CountryCode = "IN",
+                    Name = "National Stock Exchange",
+                    Description = "This is National Stock Exchange",
+                    Address = new AddressEntity
+                    {
+                        Line1 = "Exchange Plaza, C-1",
+                        Line2 = "Bandra Kurla Complex",
+                        City = "Mumbai",
+                        State = "Maharashtra",
+                        Country = "India",
+                        PhoneNumber = "9876543210",
+                        Email = "nse@test.com"
+                    }
+                });
+                collection.InsertOne(new ExchangeEntity
+                {
+                    ExchangeCode = "IB",
+                    CountryCode = "IN",
+                    Name = "Bombay Stock Exchange",
+                    Description = "This is Bombay Stock Exchange",
+                    Address = new AddressEntity
+                    {
+                        Line1 = "Phiroze Jeejeebhoy Towers",
+                        Line2 = "Dalal Street",
+                        City = "Mumbai",
+                        State = "Maharashtra",
+                        Country = "India",
+                        PhoneNumber = "8976543210",
+                        Email = "bse@test.com"
+                    }
+                });
+            }
+        }
     }
 }

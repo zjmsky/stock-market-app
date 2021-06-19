@@ -17,9 +17,11 @@ namespace StockMarket.Exchange.Api.Services
 
             var exchangeCollection = database.GetCollection<ExchangeEntity>("Exchanges");
             ExchangeCollectionManager.CreateIndex(exchangeCollection);
+            ExchangeCollectionManager.Seed(exchangeCollection, config.Value.SeedPolicy);
             
             var listingCollection = database.GetCollection<ListingEntity>("Listings");
             ListingCollectionManager.CreateIndex(listingCollection);
+            ListingCollectionManager.Seed(listingCollection, config.Value.SeedPolicy);
 
             this.Exchanges = exchangeCollection;
             this.Listings = listingCollection;

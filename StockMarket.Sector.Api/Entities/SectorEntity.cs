@@ -57,5 +57,27 @@ namespace StockMarket.Sector.Api.Entities
             var codeModel = new CreateIndexModel<SectorEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
+
+        public static void Seed(IMongoCollection<SectorEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new SectorEntity
+                {
+                    SectorCode = "AUTO",
+                    Name = "Auto Components",
+                    Description = "This is description for Auto",
+                });
+                collection.InsertOne(new SectorEntity
+                {
+                    SectorCode = "GEMS",
+                    Name = "Gems, Jewels and Watches",
+                    Description = "This is description for Gems",
+                });
+            }
+        }
     }
 }

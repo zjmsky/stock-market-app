@@ -4,5 +4,6 @@ namespace StockMarket.Company.Api.Models
     {
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }
+        public string SeedPolicy { get; set; }
     }
 }

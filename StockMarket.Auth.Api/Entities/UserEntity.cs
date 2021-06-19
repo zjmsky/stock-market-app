@@ -27,18 +27,24 @@ namespace StockMarket.Auth.Api.Entities
 
         public List<RefreshTokenEntity> RefreshTokens { get; set; }
 
-        public static UserEntity General(string username, string password, string email)
+        private static UserEntity CreateUser(string username, string password, string email, UserRole role)
         {
             return new UserEntity
             {
                 Username = username,
                 Password = password,
-                Role = UserRole.General,
+                Role = role,
                 Email = email,
-                IsVerified = false,
+                IsVerified = true, // TODO: implement mail confirmations
                 RefreshTokens = new List<RefreshTokenEntity>()
             };
         }
+
+        public static UserEntity General(string username, string password, string email) =>
+            CreateUser(username, password, email, UserRole.General);
+
+        public static UserEntity Admin(string username, string password, string email) =>
+            CreateUser(username, password, email, UserRole.Admin);
 
         public Dictionary<string, string> Validate()
         {
@@ -69,6 +75,18 @@ namespace StockMarket.Auth.Api.Entities
             var emailIndexOpts = new CreateIndexOptions { Unique = true };
             var emailIndexModel = new CreateIndexModel<UserEntity>(emailIndexKey, emailIndexOpts);
             collection.Indexes.CreateOne(emailIndexModel);
+        }
+
+        public static void Seed(IMongoCollection<UserEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+            
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(UserEntity.General("person", "Pass@123", "person@test.com"));
+                collection.InsertOne(UserEntity.Admin("admin", "Admin@123", "admin@test.com"));
+            }
         }
     }
 }

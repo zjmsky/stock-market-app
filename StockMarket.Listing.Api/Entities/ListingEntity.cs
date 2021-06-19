@@ -61,5 +61,27 @@ namespace StockMarket.Listing.Api.Entities
             var codeModel = new CreateIndexModel<ListingEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
+
+        public static void Seed(IMongoCollection<ListingEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new ListingEntity
+                {
+                    ExchangeCode = "IS",
+                    TickerSymbol = "TITAN",
+                    CompanyCode = "TITAN",
+                });
+                collection.InsertOne(new ListingEntity
+                {
+                    ExchangeCode = "IB",
+                    TickerSymbol = "TRITONV",
+                    CompanyCode = "TRITONV",
+                });
+            }
+        }
     }
 }

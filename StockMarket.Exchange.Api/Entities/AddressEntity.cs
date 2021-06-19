@@ -11,6 +11,7 @@ namespace StockMarket.Exchange.Api.Entities
     {
         public string Line1 { get; set; } = String.Empty;
         public string Line2 { get; set; } = String.Empty;
+        public string City { get; set; } = String.Empty;
         public string State { get; set; } = String.Empty;
         public string Country { get; set; } = String.Empty;
         public string PhoneNumber { get; set; } = String.Empty;

@@ -18,7 +18,7 @@ namespace StockMarket.Company.Api.Entities
 
         public bool IsMatch(ListingEntity other) =>
             ExchangeCode == other.ExchangeCode && TickerSymbol == other.TickerSymbol;
-        
+
         public bool IsMatch(string exchangeCode, string ticker) =>
             ExchangeCode == exchangeCode && TickerSymbol == ticker;
     }
@@ -37,6 +37,28 @@ namespace StockMarket.Company.Api.Entities
             var companyKey = indexBuilder.Ascending(e => e.CompanyCode);
             var companyModel = new CreateIndexModel<ListingEntity>(companyKey);
             collection.Indexes.CreateOne(companyModel);
+        }
+
+        public static void Seed(IMongoCollection<ListingEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new ListingEntity
+                {
+                    ExchangeCode = "IB",
+                    TickerSymbol = "TRITONV",
+                    CompanyCode = "TRITONV"
+                });
+                collection.InsertOne(new ListingEntity
+                {
+                    ExchangeCode = "IN",
+                    TickerSymbol = "TITAN",
+                    CompanyCode = "TITAN"
+                });
+            }
         }
     }
 }

@@ -20,16 +20,19 @@ namespace StockMarket.Listing.Api.Services
 
             var exchangeCollection = database.GetCollection<ExchangeEntity>("Exchanges");
             ExchangeCollectionManager.CreateIndex(exchangeCollection);
+            ExchangeCollectionManager.Seed(exchangeCollection, config.Value.SeedPolicy);
 
             var companyCollection = database.GetCollection<CompanyEntity>("Companies");
             CompanyCollectionManager.CreateIndex(companyCollection);
+            CompanyCollectionManager.Seed(companyCollection, config.Value.SeedPolicy);
             
             var listingCollection = database.GetCollection<ListingEntity>("Listings");
             ListingCollectionManager.CreateIndex(listingCollection);
+            ListingCollectionManager.Seed(listingCollection, config.Value.SeedPolicy);
 
             var ipoCollection = database.GetCollection<IpoEntity>("Ipos");
             IpoCollectionManager.CreateIndex(ipoCollection);
-        
+
             var priceCollection = database.GetCollection<PriceEntity>("Prices");
             PriceCollectionManager.CreateIndex(priceCollection);
 

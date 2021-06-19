@@ -11,7 +11,7 @@ namespace StockMarket.Company.Api.Entities
     {
         [JsonIgnore]
         public ObjectId Id { get; set; }
-        
+
         public string SectorCode { get; set; } = String.Empty;
     }
 
@@ -25,6 +25,18 @@ namespace StockMarket.Company.Api.Entities
             var codeOpts = new CreateIndexOptions { Unique = true };
             var codeModel = new CreateIndexModel<SectorEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
+        }
+
+        public static void Seed(IMongoCollection<SectorEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new SectorEntity { SectorCode = "AUTO" });
+                collection.InsertOne(new SectorEntity { SectorCode = "GEMS" });
+            }
         }
     }
 }

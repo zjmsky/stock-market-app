@@ -26,5 +26,17 @@ namespace StockMarket.Listing.Api.Entities
             var codeModel = new CreateIndexModel<ExchangeEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
+
+        public static void Seed(IMongoCollection<ExchangeEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new ExchangeEntity { ExchangeCode = "IS", });
+                collection.InsertOne(new ExchangeEntity { ExchangeCode = "IB" });
+            }
+        }
     }
 }

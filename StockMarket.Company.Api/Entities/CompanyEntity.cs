@@ -76,5 +76,35 @@ namespace StockMarket.Company.Api.Entities
             var codeModel = new CreateIndexModel<CompanyEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
+
+        public static void Seed(IMongoCollection<CompanyEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+            
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new CompanyEntity
+                {
+                    CompanyCode = "TRITONV",
+                    SectorCode = "AUTO",
+                    Name = "Triton Valves Ltd.",
+                    Description = "This is triton",
+                    Turnover = "200K",
+                    CEO = "Brian M. Sondey",
+                    Directors = new List<string>()
+                });
+                collection.InsertOne(new CompanyEntity
+                {
+                    CompanyCode = "TITAN",
+                    SectorCode = "GEMS",
+                    Name = "Titan Company Ltd.",
+                    Description = "This is titan",
+                    Turnover = "3M",
+                    CEO = "C K Venkataraman",
+                    Directors = new List<string>()
+                });
+            }
+        }
     }
 }

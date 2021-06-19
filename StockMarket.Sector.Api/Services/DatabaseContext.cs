@@ -17,9 +17,11 @@ namespace StockMarket.Sector.Api.Services
 
             var sectorCollection = database.GetCollection<SectorEntity>("Sectors");
             SectorCollectionManager.CreateIndex(sectorCollection);
+            SectorCollectionManager.Seed(sectorCollection, config.Value.SeedPolicy);
 
             var companyCollection = database.GetCollection<CompanyEntity>("Companies");
             CompanyCollectionManager.CreateIndex(companyCollection);
+            CompanyCollectionManager.Seed(companyCollection, config.Value.SeedPolicy);
 
             this.Sectors = sectorCollection;
             this.Companies = companyCollection;

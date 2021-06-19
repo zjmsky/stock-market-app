@@ -26,5 +26,17 @@ namespace StockMarket.Listing.Api.Entities
             var codeModel = new CreateIndexModel<CompanyEntity>(codeKey, codeOpts);
             collection.Indexes.CreateOne(codeModel);
         }
+
+        public static void Seed(IMongoCollection<CompanyEntity> collection, string policy)
+        {
+            if (policy.ToLower() != "dev")
+                return;
+
+            if (collection.Find(x => true).Any() == false)
+            {
+                collection.InsertOne(new CompanyEntity { CompanyCode = "TRITONV", });
+                collection.InsertOne(new CompanyEntity { CompanyCode = "TITAN" });
+            }
+        }
     }
 }
