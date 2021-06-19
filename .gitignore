@@ -7,6 +7,9 @@
 /StockMarket.*.Api/obj/
 /StockMarket.*.Api/Migrations/
 
+# log files
+/.logs/
+
 # editor files
 /**/.vscode/
 
