@@ -1,8 +1,20 @@
 <mat-toolbar>
     <img class="logo" src="assets/logo-text-white.png" width="150px" />
     <span class="flex-spacer"></span>
-    <a mat-button id="login-button" routerLink="/account/login">Login</a>
-    <a mat-stroked-button id="register-button" routerLink="/account/register">
-        Register
-    </a>
+    <div *ngIf="currentUser === null">
+        <a mat-button id="login-button" routerLink="/account/login">Login</a>
+        <a
+            mat-stroked-button
+            id="register-button"
+            routerLink="/account/register"
+        >
+            Register
+        </a>
+    </div>
+    <div *ngIf="currentUser !== null">
+        <button mat-icon-button id="logout-button" (click)="onLogoutClick()">
+            <mat-icon>logout</mat-icon>
+        </button>
+        <p id="greeting">Welcome {{ currentUser.username }}</p>
+    </div>
 </mat-toolbar>

@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using MongoDB.Driver;
@@ -11,6 +12,7 @@ namespace StockMarket.Listing.Api.Entities
     public class IpoEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string ExchangeCode { get; set; } = String.Empty;
@@ -21,17 +23,10 @@ namespace StockMarket.Listing.Api.Entities
 
         public DateTime OpenTime { get; set; }
 
-        public bool IsMatch(IpoEntity other) =>
-            ExchangeCode == other.ExchangeCode &&
-            TickerSymbol == other.TickerSymbol;
-
-        public bool IsMatch(ListingEntity other) =>
-            ExchangeCode == other.ExchangeCode &&
-            TickerSymbol == other.TickerSymbol;
-
-        public bool IsMatch(string exchangeCode, string ticker) =>
-            ExchangeCode == exchangeCode &&
-            TickerSymbol == ticker;
+        public static Expression<Func<IpoEntity, bool>> IsMatch(string exchange, string ticker)
+        {
+            return i => i.TickerSymbol == ticker && i.ExchangeCode == exchange;
+        }
 
         public IpoEntity Sanitize()
         {

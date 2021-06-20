@@ -16,8 +16,7 @@ namespace StockMarket.Listing.Api.Controllers
             _repo = repo;
         }
 
-        [HttpPost]
-        [Route("{exchange}:{ticker}")]
+        [HttpPost("{exchange}:{ticker}")]
         public async Task<ActionResult> Post(string exchange, string ticker, [FromBody] IpoEntity ipo)
         {
             // ensure consistency
@@ -27,8 +26,7 @@ namespace StockMarket.Listing.Api.Controllers
             return success ? Ok() : BadRequest();
         }
 
-        [HttpPut]
-        [Route("{exchange}:{ticker}")]
+        [HttpPut("{exchange}:{ticker}")]
         public async Task<ActionResult> Put(string exchange, string ticker, [FromBody] IpoEntity ipo)
         {
             // ensure consistency
@@ -38,8 +36,7 @@ namespace StockMarket.Listing.Api.Controllers
             return success ? Ok() : BadRequest();
         }
 
-        [HttpDelete]
-        [Route("{exchange}:{ticker}")]
+        [HttpDelete("{exchange}:{ticker}")]
         public async Task<ActionResult> Delete(string exchange, string ticker)
         {
             var success = await _repo.DeleteOne(exchange, ticker);
@@ -53,12 +50,11 @@ namespace StockMarket.Listing.Api.Controllers
             return Ok(ipoList);
         }
 
-        [HttpGet]
-        [Route("{exchange}:{ticker}")]
+        [HttpGet("{exchange}:{ticker}")]
         public async Task<ActionResult> Get(string exchange, string ticker)
         {
-            var sector = await _repo.FindOneByTicker(exchange, ticker);
-            return sector != null ? Ok(sector) : NotFound();
+            var ipo = await _repo.FindOneByTicker(exchange, ticker);
+            return ipo != null ? Ok(ipo) : NotFound();
         }
     }
 }

@@ -1,0 +1,30 @@
+<h2 class="title">Sectors</h2>
+
+<button mat-flat-button id="new-button" routerLink="/sectors/new">
+    <mat-icon inline="true">add</mat-icon>
+    Create New
+</button>
+
+<table mat-table [dataSource]="dataSource">
+    <ng-container matColumnDef="sectorCode">
+        <th mat-header-cell *matHeaderCellDef>Sector Code</th>
+        <td mat-cell *matCellDef="let element">{{ element.sectorCode }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr
+        mat-row
+        (click)="onRowClick(row)"
+        *matRowDef="let row; columns: displayedColumns"
+    ></tr>
+</table>
+<mat-paginator
+    [length]="itemCount"
+    [pageSize]="pageSize"
+    (page)="onPageChange($event)"
+></mat-paginator>

@@ -1,0 +1,24 @@
+<h2 class="title">{{ company?.name }}</h2>
+
+<p class="content">{{ company?.description }}</p>
+
+<p class="content">Sector: {{ company?.sectorCode }}</p>
+<p class="content">Turnover: {{ company?.turnover }}</p>
+<p class="content">CEO: {{ company?.ceo }}</p>
+
+<h4 class="section">Listings</h4>
+<ol>
+    <li *ngFor="let listing of listings">
+        {{ listing?.exchangeCode }}:{{ listing?.tickerSymbol }}
+    </li>
+</ol>
+
+<button
+    mat-flat-button
+    [routerLink]="'/companies/edit/' + company?.companyCode"
+>
+    Edit
+</button>
+<button mat-flat-button class="delete-button" (click)="deleteCompany()">
+    Delete
+</button>

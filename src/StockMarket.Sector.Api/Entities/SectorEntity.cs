@@ -12,6 +12,7 @@ namespace StockMarket.Sector.Api.Entities
     public class SectorEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string SectorCode { get; set; } = String.Empty;

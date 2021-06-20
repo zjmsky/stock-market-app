@@ -37,11 +37,14 @@ namespace StockMarket.Exchange.Api.Services
 
         public static void AddCustomCors(this IServiceCollection services, string policyName)
         {
+            var exposedHeaders = new string[] { "Total-Count" };
+
             services.AddCors(options =>
                 options.AddPolicy(policyName, builder => builder
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader()
+                    .WithExposedHeaders(exposedHeaders)
                 )
             );
         }

@@ -1,0 +1,61 @@
+<div>
+    <form [formGroup]="compareForm!" (ngSubmit)="onRequest()">
+        <mat-form-field hideRequiredMarker appearance="outline">
+            <mat-label>Company1</mat-label>
+            <input
+                matInput
+                type="text"
+                placeholder="Ex: IB:TRITONV"
+                autocomplete="off"
+                formControlName="listing1"
+            />
+        </mat-form-field>
+        <mat-form-field hideRequiredMarker appearance="outline">
+            <mat-label>Company2</mat-label>
+            <input
+                matInput
+                type="text"
+                placeholder="Ex: IS:TITAN"
+                autocomplete="off"
+                formControlName="listing2"
+            />
+        </mat-form-field>
+        <mat-form-field hideRequiredMarker appearance="outline">
+            <mat-label>From Time</mat-label>
+            <input
+                matInput
+                [matDatepicker]="fromPicker"
+                formControlName="fromTime"
+            />
+            <mat-datepicker-toggle
+                matSuffix
+                [for]="fromPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field hideRequiredMarker appearance="outline">
+            <mat-label>To Time</mat-label>
+            <input
+                matInput
+                [matDatepicker]="toPicker"
+                formControlName="toTime"
+            />
+            <mat-datepicker-toggle
+                matSuffix
+                [for]="toPicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-flat-button color="accent">Request</button>
+    </form>
+
+    <canvas
+        baseChart
+        chartType="bar"
+        [datasets]="barChartData"
+        [labels]="barChartLabels"
+        [options]="barChartOptions"
+        [colors]="barChartColors"
+    ></canvas>
+</div>

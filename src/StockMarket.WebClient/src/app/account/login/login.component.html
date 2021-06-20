@@ -1,27 +1,35 @@
-<mat-card>
-    <mat-card-title>Login</mat-card-title>
-    <mat-card-content>
-        <form [formGroup]="loginForm!" (ngSubmit)="onSubmit()">
+<mat-card id="form-card">
+    <mat-card-title id="form-card-title">Login</mat-card-title>
+    <mat-card-content id="form-card-content">
+        <form id="form-main" [formGroup]="loginForm!" (ngSubmit)="onSubmit()">
             <mat-error id="form-submit-error" *ngIf="formError">
                 {{ formError }}
             </mat-error>
-            <mat-form-field hideRequiredMarker appearance="outline">
+            <mat-form-field
+                class="form-field"
+                hideRequiredMarker
+                appearance="outline"
+            >
                 <mat-label>Username</mat-label>
                 <input
                     matInput
                     type="text"
-                    placeholder="Username"
+                    placeholder="username"
                     autocomplete="off"
                     formControlName="username"
                     required
                 />
             </mat-form-field>
-            <mat-form-field hideRequiredMarker appearance="outline">
+            <mat-form-field
+                class="form-field"
+                hideRequiredMarker
+                appearance="outline"
+            >
                 <mat-label>Password</mat-label>
                 <input
                     matInput
                     type="password"
-                    placeholder="Password"
+                    placeholder="password"
                     formControlName="password"
                     required
                 />
@@ -34,7 +42,7 @@
             <button
                 mat-raised-button
                 color="primary"
-                class="submit-button"
+                id="submit-button"
                 [disabled]="formLoading"
             >
                 Login

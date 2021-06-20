@@ -16,8 +16,7 @@ namespace StockMarket.Listing.Api.Controllers
             _repo = repo;
         }
 
-        [HttpPost]
-        [Route("{exchange}:{ticker}")]
+        [HttpPost("{exchange}:{ticker}")]
         public async Task<ActionResult> Post(string exchange, string ticker, [FromBody] ListingEntity listing)
         {
             // ensure consistency
@@ -27,8 +26,7 @@ namespace StockMarket.Listing.Api.Controllers
             return success ? Ok() : BadRequest();
         }
 
-        [HttpPut]
-        [Route("{exchange}:{ticker}")]
+        [HttpPut("{exchange}:{ticker}")]
         public async Task<ActionResult> Put(string exchange, string ticker, [FromBody] ListingEntity listing)
         {
             // ensure consistency
@@ -38,8 +36,7 @@ namespace StockMarket.Listing.Api.Controllers
             return success ? Ok() : BadRequest();
         }
 
-        [HttpDelete]
-        [Route("{exchange}:{ticker}")]
+        [HttpDelete("{exchange}:{ticker}")]
         public async Task<ActionResult> Delete(string exchange, string ticker)
         {
             var success = await _repo.DeleteOne(exchange, ticker);
@@ -49,16 +46,22 @@ namespace StockMarket.Listing.Api.Controllers
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] int page = 1, [FromQuery] int count = 10)
         {
-            var sectorList = await _repo.Enumerate(page, count);
-            return Ok(sectorList);
+            var listingList = await _repo.Enumerate(page, count);
+            return Ok(listingList);
         }
 
-        [HttpGet]
-        [Route("{exchange}:{ticker}")]
+        [HttpGet("{company}")]
+        public async Task<ActionResult> Get(string company)
+        {
+            var listingList = await _repo.FindByCompany(company);
+            return Ok(listingList);
+        }
+
+        [HttpGet("{exchange}:{ticker}")]
         public async Task<ActionResult> Get(string exchange, string ticker)
         {
-            var sector = await _repo.FindOneByTicker(exchange, ticker);
-            return sector != null ? Ok(sector) : NotFound();
+            var listing = await _repo.FindOneByTicker(exchange, ticker);
+            return listing != null ? Ok(listing) : NotFound();
         }
     }
 }

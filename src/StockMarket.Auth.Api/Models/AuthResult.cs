@@ -1,5 +1,3 @@
-using System;
-
 namespace StockMarket.Auth.Api.Models
 {
     public class AuthSuccess

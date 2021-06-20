@@ -10,6 +10,7 @@ namespace StockMarket.Listing.Api.Entities
     public class ExchangeEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string ExchangeCode { get; set; } = String.Empty;

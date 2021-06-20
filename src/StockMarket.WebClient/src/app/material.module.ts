@@ -7,6 +7,8 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatNativeDateModule } from "@angular/material/core";
 import { MatListModule } from "@angular/material/list";
 import { MatTableModule } from "@angular/material/table";
 import { MatPaginatorModule } from "@angular/material/paginator";
@@ -20,6 +22,8 @@ import { MatPaginatorModule } from "@angular/material/paginator";
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
         MatListModule,
         MatTableModule,
         MatPaginatorModule
@@ -32,6 +36,8 @@ import { MatPaginatorModule } from "@angular/material/paginator";
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
         MatListModule,
         MatTableModule,
         MatPaginatorModule

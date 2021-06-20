@@ -18,9 +18,8 @@ namespace StockMarket.Listing.Api.Services
         private async Task<bool> ValidateReferences(IpoEntity ipo)
         {
             // validate listing reference
-            var listingExists = await _context.Listings
-                .Find(l => l.IsMatch(ipo))
-                .AnyAsync();
+            var listingFilter = ListingEntity.IsMatch(ipo.ExchangeCode, ipo.TickerSymbol);
+            var listingExists = await _context.Listings.Find(listingFilter).AnyAsync();
             if (!listingExists) return false;
 
             return true;
@@ -43,14 +42,16 @@ namespace StockMarket.Listing.Api.Services
 
         private async Task<bool> ReplaceOneUnchecked(IpoEntity ipo)
         {
-            try { await _context.Ipos.ReplaceOneAsync(i => i.IsMatch(ipo), ipo); }
+            var filter = IpoEntity.IsMatch(ipo.ExchangeCode, ipo.TickerSymbol);
+            try { await _context.Ipos.ReplaceOneAsync(filter, ipo); }
             catch (MongoWriteException) { return false; }
             return true;
         }
 
         private async Task<bool> DeleteOneUnchecked(IpoEntity ipo)
         {
-            var result = await _context.Ipos.DeleteOneAsync(i => i.IsMatch(ipo));
+            var filter = IpoEntity.IsMatch(ipo.ExchangeCode, ipo.TickerSymbol);
+            var result = await _context.Ipos.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
         }
     
@@ -93,9 +94,8 @@ namespace StockMarket.Listing.Api.Services
             // case insensitive
             exchangeCode = exchangeCode.ToUpper();
             tickerSymbol = tickerSymbol.ToUpper();
-            return await _context.Ipos
-                .Find(i => i.IsMatch(exchangeCode, tickerSymbol))
-                .FirstOrDefaultAsync();
+            var filter = IpoEntity.IsMatch(exchangeCode, tickerSymbol);
+            return await _context.Ipos.Find(filter).FirstOrDefaultAsync();
         }
     }
 }

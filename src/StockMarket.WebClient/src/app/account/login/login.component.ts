@@ -3,7 +3,7 @@ import { Router } from "@angular/router";
 import { FormGroup, FormBuilder } from "@angular/forms";
 import { AbstractControl } from "@angular/forms";
 import { Subject, of } from "rxjs";
-import { catchError, finalize, first, takeUntil, tap } from "rxjs/operators";
+import { catchError, finalize, takeUntil, tap } from "rxjs/operators";
 
 import { AuthenticationService } from "@root/_services/auth.service";
 import { AuthUser } from "@root/_models/authuser";
@@ -62,18 +62,17 @@ export class LoginComponent implements OnInit, OnDestroy {
         this._authService
             .login(this.username!.value, this.password!.value)
             .pipe(takeUntil(this.destroy$))
-            .pipe(first())
-            .pipe(tap((user) => this.handleLoginSuccess(user)))
+            .pipe(tap(() => this.handleLoginSuccess))
             .pipe(catchError((err) => of(this.handleLoginError(err))))
             .pipe(finalize(() => (this.formLoading = false)))
             .subscribe();
     }
 
-    private handleLoginSuccess(user: AuthUser) {
+    private handleLoginSuccess() {
         this._router.navigateByUrl("/dashboard");
     }
 
-    private handleLoginError(error: any) {
+    private handleLoginError(error: any): void {
         if (error.status === 400) {
             this.formError = "Incorrect username or password";
         } else {

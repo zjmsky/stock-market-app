@@ -1,26 +1,26 @@
-mat-card {
+#form-card {
     max-width: 400px;
     margin: 70px auto;
     text-align: center;
 }
 
-mat-card-title {
+#form-card-title {
     padding: 20px 0px;
     margin: 0px;
 }
 
-mat-form-field {
-    display: block;
-    margin: 8px auto;
-}
-
-form {
+#form-main {
     padding: 10px 30px;
 }
 
 #form-submit-error {
     font-size: 13px;
     margin-bottom: 30px;
+}
+
+.form-field {
+    display: block;
+    margin: 8px auto;
 }
 
 #forgot-password-help {
@@ -48,7 +48,7 @@ form {
     text-decoration: none;
 }
 
-.submit-button {
+#submit-button {
     display: block;
     width: 100%;
     text-transform: uppercase;

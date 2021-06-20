@@ -1,0 +1,10 @@
+<h2 class="title">{{ sector?.name }}</h2>
+
+<p class="content">{{ sector?.description }}</p>
+
+<button mat-flat-button [routerLink]="'/sectors/edit/' + sector?.sectorCode">
+    Edit
+</button>
+<button mat-flat-button class="delete-button" (click)="deleteSector()">
+    Delete
+</button>

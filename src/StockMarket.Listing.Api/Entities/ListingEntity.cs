@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Text.Json.Serialization;
@@ -12,28 +13,18 @@ namespace StockMarket.Listing.Api.Entities
     public class ListingEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string ExchangeCode { get; set; } = String.Empty;
         public string TickerSymbol { get; set; } = String.Empty;
         public string CompanyCode { get; set; } = String.Empty;
 
-        public bool IsMatch(ListingEntity other) =>
-            ExchangeCode == other.ExchangeCode &&
-            TickerSymbol == other.TickerSymbol;
-
-        public bool IsMatch(IpoEntity other) =>
-            ExchangeCode == other.ExchangeCode &&
-            TickerSymbol == other.TickerSymbol;
-
-        public bool IsMatch(PriceEntity other) =>
-            ExchangeCode == other.ExchangeCode &&
-            TickerSymbol == other.TickerSymbol;
-
-        public bool IsMatch(string exchangeCode, string ticker) =>
-            ExchangeCode == exchangeCode &&
-            TickerSymbol == ticker;
-
+        public static Expression<Func<ListingEntity, bool>> IsMatch(string exchange, string ticker)
+        {
+            return l => l.TickerSymbol == ticker && l.ExchangeCode == exchange;
+        }
+        
         public ListingEntity Sanitize()
         {
             return this;

@@ -12,6 +12,7 @@ namespace StockMarket.Auth.Api.Entities
     public class UserEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string Username { get; set; }

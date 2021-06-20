@@ -64,7 +64,7 @@
             "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]
         },
         {
-            "UpstreamPathTemplate": "/listing/{everything}",
+            "UpstreamPathTemplate": "/listings/{everything}",
             "DownstreamPathTemplate": "/listings/{everything}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]

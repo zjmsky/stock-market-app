@@ -22,7 +22,8 @@ namespace StockMarket.Exchange.Api.Services
 
         private async Task<bool> ReplaceOneUnchecked(ListingEntity listing)
         {
-            try { await _context.Listings.ReplaceOneAsync(l => l.IsMatch(listing), listing); }
+            var filter = ListingEntity.IsMatch(listing.ExchangeCode, listing.TickerSymbol);
+            try { await _context.Listings.ReplaceOneAsync(filter, listing); }
             catch (MongoWriteException) { return false; }
             return true;
         }
@@ -34,15 +35,15 @@ namespace StockMarket.Exchange.Api.Services
 
         public async Task<bool> DeleteOneUnchecked(ListingEntity listing)
         {
-            var result = await _context.Listings.DeleteOneAsync(l => l.IsMatch(listing));
+            var filter = ListingEntity.IsMatch(listing.ExchangeCode, listing.TickerSymbol);
+            var result = await _context.Listings.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
         }
 
         public async Task<ListingEntity> FindOneByTicker(string exchangeCode, string tickerSymbol)
         {
-            return await _context.Listings
-                .Find(l => l.IsMatch(exchangeCode, tickerSymbol))
-                .FirstOrDefaultAsync();
+            var filter = ListingEntity.IsMatch(exchangeCode, tickerSymbol);
+            return await _context.Listings.Find(filter).FirstOrDefaultAsync();
         }
     }
 }

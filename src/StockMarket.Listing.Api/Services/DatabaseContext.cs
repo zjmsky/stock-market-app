@@ -35,6 +35,7 @@ namespace StockMarket.Listing.Api.Services
 
             var priceCollection = database.GetCollection<PriceEntity>("Prices");
             PriceCollectionManager.CreateIndex(priceCollection);
+            PriceCollectionManager.Seed(priceCollection, config.Value.SeedPolicy);
 
             this.Exchanges = exchangeCollection;
             this.Companies = companyCollection;

@@ -31,7 +31,7 @@ export class ListComponent {
     onPageChange(event: any) {
         this._exchangeService
             .getList(event.pageIndex, this.pageSize)
-            .pipe(tap(response => this.handleResponse(response)))
+            .pipe(tap((response) => this.handleResponse(response)))
             .subscribe();
     }
 
@@ -42,7 +42,7 @@ export class ListComponent {
     }
 
     handleResponse(response: HttpResponse<Exchange[]>) {
-        const countRepr = response.headers.get('Total-Count')!;
+        const countRepr = response.headers.get("Total-Count")!;
         this.itemCount = Number.parseInt(countRepr);
 
         this.dataSource = response.body!;

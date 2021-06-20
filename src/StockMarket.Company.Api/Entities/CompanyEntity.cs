@@ -13,6 +13,7 @@ namespace StockMarket.Company.Api.Entities
     public class CompanyEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string CompanyCode { get; set; } = String.Empty;
@@ -38,9 +39,6 @@ namespace StockMarket.Company.Api.Entities
 
             if (CompanyCode.Length == 0)
                 result.Add("companyCode", "required");
-
-            if (Regex.IsMatch(SectorCode, @"^[A-Z]{2}$") == false)
-                result.Add("sectorCode", "invalid");
 
             if (Name.Length == 0)
                 result.Add("name", "required");

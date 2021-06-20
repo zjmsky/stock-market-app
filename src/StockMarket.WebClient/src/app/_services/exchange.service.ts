@@ -15,13 +15,16 @@ export class ExchangeService {
         this._url = environment.apiUrl;
     }
 
-    public getList(page: number, count: number): Observable<HttpResponse<Exchange[]>> {
+    public getList(
+        page: number,
+        count: number
+    ): Observable<HttpResponse<Exchange[]>> {
         const getUrl = `${this._url}/exchanges?page=${page}&count=${count}`;
-        return this._http.get<Exchange[]>(getUrl, { observe: 'response' });
+        return this._http.get<Exchange[]>(getUrl, { observe: "response" });
     }
 
     public getOne(code: string): Observable<Exchange> {
-        const getUrl = `${this._url}/exchanges/${code}`
+        const getUrl = `${this._url}/exchanges/${code}`;
         return this._http.get<Exchange>(getUrl);
     }
 
@@ -35,5 +38,10 @@ export class ExchangeService {
         const updateUrl = `${this._url}/exchanges/${exchange.exchangeCode}`;
         const updateBody = exchange;
         return this._http.put(updateUrl, updateBody);
+    }
+
+    public delete(code: string): Observable<object> {
+        const deleteUrl = `${this._url}/exchanges/${code}`;
+        return this._http.delete(deleteUrl);
     }
 }

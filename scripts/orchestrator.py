@@ -108,7 +108,7 @@ class ProcessManager:
             raise
 
 def parse_args():
-    parser = argparse.ArgumentParser('central project runner')
+    parser = argparse.ArgumentParser('central orchestrator')
     parser.add_argument('--profile', default='dev', choices=['dev', 'test', 'prod'])
     parser.add_argument('--log-policy', default='overwrite', choices=['none', 'overwrite', 'append']),
     parser.add_argument('--base-dir', default='.')
@@ -123,7 +123,7 @@ def main():
     proc_man.spawn_dotnet('exchange.api', 'src/StockMarket.Exchange.Api')
     proc_man.spawn_dotnet('company.api', 'src/StockMarket.Company.Api')
     proc_man.spawn_dotnet('listing.api', 'src/StockMarket.Listing.Api')
-    # proc_man.spawn_dotnet('gateway.api', 'src/StockMarket.Gateway.Api')
+    proc_man.spawn_dotnet('gateway.api', 'src/StockMarket.Gateway.Api')
     
     proc_man.poll()
 

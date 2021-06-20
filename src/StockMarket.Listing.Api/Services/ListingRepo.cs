@@ -38,9 +38,8 @@ namespace StockMarket.Listing.Api.Services
         private async Task<bool> AssertNoReferences(ListingEntity listing)
         {
             // assert no reference in ipo collection
-            var ipoExists = await _context.Ipos
-                .Find(i => i.IsMatch(listing))
-                .AnyAsync();
+            var ipoFilter = IpoEntity.IsMatch(listing.ExchangeCode, listing.TickerSymbol);
+            var ipoExists = await _context.Ipos.Find(ipoFilter).AnyAsync();
             if (ipoExists) return false;
 
             return true;
@@ -55,14 +54,16 @@ namespace StockMarket.Listing.Api.Services
 
         private async Task<bool> ReplaceOneUnchecked(ListingEntity listing)
         {
-            try { await _context.Listings.ReplaceOneAsync(l => l.IsMatch(listing), listing); }
+            var filter = ListingEntity.IsMatch(listing.ExchangeCode, listing.TickerSymbol);
+            try { await _context.Listings.ReplaceOneAsync(filter, listing); }
             catch (MongoWriteException) { return false; }
             return true;
         }
 
         private async Task<bool> DeleteOneUnchecked(ListingEntity listing)
         {
-            var result = await _context.Listings.DeleteOneAsync(l => l.IsMatch(listing));
+            var filter = ListingEntity.IsMatch(listing.ExchangeCode, listing.TickerSymbol);
+            var result = await _context.Listings.DeleteOneAsync(filter);
             return result.DeletedCount > 0;
         }
     
@@ -117,14 +118,22 @@ namespace StockMarket.Listing.Api.Services
                 .ToListAsync();
         }
 
+        public async Task<List<ListingEntity>> FindByCompany(string companyCode)
+        {
+            // case insensitive
+            companyCode = companyCode.ToUpper();
+            return await _context.Listings
+                .Find(l => l.CompanyCode == companyCode)
+                .ToListAsync();
+        }
+
         public async Task<ListingEntity> FindOneByTicker(string exchangeCode, string tickerSymbol)
         {
             // case insensitive
             exchangeCode = exchangeCode.ToUpper();
             tickerSymbol = tickerSymbol.ToUpper();
-            return await _context.Listings
-                .Find(l => l.IsMatch(exchangeCode, tickerSymbol))
-                .FirstOrDefaultAsync();
+            var filter = ListingEntity.IsMatch(exchangeCode, tickerSymbol);
+            return await _context.Listings.Find(filter).FirstOrDefaultAsync();
         }
     }
 }

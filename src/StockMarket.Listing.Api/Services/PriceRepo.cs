@@ -18,9 +18,8 @@ namespace StockMarket.Listing.Api.Services
         private async Task<bool> ValidateReferences(PriceEntity price)
         {
             // validate listing reference
-            var listingExists = await _context.Listings
-                .Find(l => l.IsMatch(price))
-                .AnyAsync();
+            var listingFilter = ListingEntity.IsMatch(price.ExchangeCode, price.TickerSymbol);
+            var listingExists = await _context.Listings.Find(listingFilter).AnyAsync();
             if (!listingExists) return false;
 
             return true;
@@ -43,7 +42,8 @@ namespace StockMarket.Listing.Api.Services
 
         private async Task<bool> ReplaceOneUnchecked(PriceEntity price)
         {
-            try { await _context.Prices.ReplaceOneAsync(p => p.IsOverlap(price), price); }
+            var filter = PriceEntity.IsOverlap(price);
+            try { await _context.Prices.ReplaceOneAsync(filter, price); }
             catch (MongoWriteException) { return false; }
             return true;
         }
@@ -62,15 +62,19 @@ namespace StockMarket.Listing.Api.Services
                 && await ReplaceOneUnchecked(price);
         }
 
-        public async Task<List<PriceEntity>> Enumerate(int page = 1, int count = 10)
+        public async Task<List<PriceEntity>> Enumerate(
+            string exchange,
+            string ticker,
+            DateTime fromTime,
+            DateTime toTime
+        )
         {
-            // ensure valid values
-            page = Math.Max(page, 1);
-            count = Math.Clamp(count, 1, 50);
             return await _context.Prices
-                .Find(x => true)
-                .Skip((page - 1) * count)
-                .Limit(count)
+                .Find(p =>
+                    p.TickerSymbol == ticker &&
+                    p.ExchangeCode == exchange &&
+                    p.Time >= fromTime &&
+                    p.Time <= toTime)
                 .ToListAsync();
         }
     }

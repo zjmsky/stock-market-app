@@ -21,3 +21,17 @@ mat-toolbar {
     color: white;
     border-color: white;
 }
+
+#logout-button {
+    color: white;
+    float: right;
+    margin: 10px 0;
+}
+
+#greeting {
+    float: right;
+    margin: 15px 0;
+    padding-right: 10px;
+    color: white;
+    font-size: 14px;
+}

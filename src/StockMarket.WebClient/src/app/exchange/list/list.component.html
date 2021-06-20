@@ -1,7 +1,7 @@
 <h2 class="title">Stock Exchanges</h2>
 
 <button mat-flat-button id="new-button" routerLink="/exchanges/new">
-    <mat-icon inline=true>add</mat-icon>
+    <mat-icon inline="true">add</mat-icon>
     Create New
 </button>
 
@@ -18,7 +18,9 @@
 
     <ng-container matColumnDef="country">
         <th mat-header-cell *matHeaderCellDef>Country</th>
-        <td mat-cell *matCellDef="let element">{{ element.address.country }}</td>
+        <td mat-cell *matCellDef="let element">
+            {{ element.address.country }}
+        </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Text.Json.Serialization;
 using MongoDB.Driver;
 using MongoDB.Bson;
@@ -10,16 +11,16 @@ namespace StockMarket.Exchange.Api.Entities
     public class ListingEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string ExchangeCode { get; set; } = String.Empty;
         public string TickerSymbol { get; set; } = String.Empty;
 
-        public bool IsMatch(ListingEntity other) =>
-            ExchangeCode == other.ExchangeCode && TickerSymbol == other.TickerSymbol;
-
-        public bool IsMatch(string exchangeCode, string ticker) =>
-            ExchangeCode == exchangeCode && TickerSymbol == ticker;
+        public static Expression<Func<ListingEntity, bool>> IsMatch(string exchange, string ticker)
+        {
+            return l => l.TickerSymbol == ticker && l.ExchangeCode == exchange;
+        }
     }
 
     public static class ListingCollectionManager

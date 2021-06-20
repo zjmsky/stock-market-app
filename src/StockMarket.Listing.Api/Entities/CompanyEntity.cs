@@ -10,6 +10,7 @@ namespace StockMarket.Listing.Api.Entities
     public class CompanyEntity
     {
         [JsonIgnore]
+        [BsonIgnoreIfDefault]
         public ObjectId Id { get; set; }
 
         public string CompanyCode { get; set; } = String.Empty;

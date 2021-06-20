@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using StockMarket.Listing.Api.Entities;
@@ -16,8 +17,7 @@ namespace StockMarket.Listing.Api.Controllers
             _repo = repo;
         }
 
-        [HttpPost]
-        [Route("{exchange}:{ticker}")]
+        [HttpPost("{exchange}:{ticker}")]
         public async Task<ActionResult> Post(string exchange, string ticker, [FromBody] PriceEntity price)
         {
             // ensure consistency
@@ -27,8 +27,7 @@ namespace StockMarket.Listing.Api.Controllers
             return success ? Ok() : BadRequest();
         }
 
-        [HttpPut]
-        [Route("{exchange}:{ticker}")]
+        [HttpPut("{exchange}:{ticker}")]
         public async Task<ActionResult> Put(string exchange, string ticker, [FromBody] PriceEntity price)
         {
             // ensure consistency
@@ -38,10 +37,10 @@ namespace StockMarket.Listing.Api.Controllers
             return success ? Ok() : BadRequest();
         }
 
-        [HttpGet]
-        public async Task<ActionResult> Get([FromQuery] int page = 1, [FromQuery] int count = 10)
+        [HttpGet("{exchange}:{ticker}")]
+        public async Task<ActionResult> Get(string exchange, string ticker, [FromQuery] DateTime fromTime, [FromQuery] DateTime toTime)
         {
-            var ipoList = await _repo.Enumerate(page, count);
+            var ipoList = await _repo.Enumerate(exchange, ticker, fromTime, toTime);
             return Ok(ipoList);
         }
     }

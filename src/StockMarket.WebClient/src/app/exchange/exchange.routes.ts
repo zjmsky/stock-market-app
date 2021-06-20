@@ -4,7 +4,7 @@ import { Routes, RouterModule } from "@angular/router";
 import { ExchangeComponent } from "./exchange.component";
 import { ListComponent } from "./list/list.component";
 import { ViewComponent } from "./view/view.component";
-import { NewComponent } from "./new/new.component";
+import { EditComponent } from "./edit/edit.component";
 
 const routes: Routes = [
     {
@@ -12,9 +12,10 @@ const routes: Routes = [
         component: ExchangeComponent,
         children: [
             { path: "", component: ListComponent },
-            { path: "new", component: NewComponent },
+            { path: "new", component: EditComponent },
             { path: ":exchangeCode", component: ViewComponent },
-        ],
+            { path: "edit/:exchangeCode", component: EditComponent }
+        ]
     }
 ];
 

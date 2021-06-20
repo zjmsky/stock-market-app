@@ -9,7 +9,7 @@ import { ExchangeRouterModule } from "./exchange.routes";
 import { ExchangeComponent } from "./exchange.component";
 import { ListComponent } from "./list/list.component";
 import { ViewComponent } from "./view/view.component";
-import { NewComponent } from "./new/new.component";
+import { EditComponent } from "./edit/edit.component";
 
 @NgModule({
     imports: [
@@ -20,6 +20,11 @@ import { NewComponent } from "./new/new.component";
         HttpClientModule,
         ExchangeRouterModule
     ],
-    declarations: [ExchangeComponent, ListComponent, ViewComponent, NewComponent]
+    declarations: [
+        ExchangeComponent,
+        ListComponent,
+        ViewComponent,
+        EditComponent
+    ]
 })
 export class ExchangeModule {}

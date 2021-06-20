@@ -9,3 +9,10 @@ mat-form-field {
     padding: 0px 50% 0px 0px;
     width: 100%;
 }
+
+.submit-button {
+    margin-right: 20px;
+    float: right;
+    background-color: #db521c;
+    color: white;
+}
