@@ -73,12 +73,13 @@ class ProcessManager:
         return process
     
     def spawn_dotnet(self, name: str, path: str):
+        prev_dir = os.getcwd()
         os.chdir(f'./{path}')
         profile_map = { 'dev': 'Development', 'test': 'Testing', 'prod': 'Production' }
         dotnet_profile = profile_map[self._config.profile]
         command = f'dotnet run --launch-profile={dotnet_profile}'
         process = self._spawn_inner(name, command)
-        os.chdir('..')
+        os.chdir(prev_dir)
         return process
 
     def _poll_unsafe(self):
@@ -117,12 +118,12 @@ def main():
     proc_man = ProcessManager(parse_args())
     proc_man.register_signals()
 
-    proc_man.spawn_dotnet('auth.api', 'StockMarket.Auth.Api')
-    proc_man.spawn_dotnet('sector.api', 'StockMarket.Sector.Api')
-    proc_man.spawn_dotnet('exchange.api', 'StockMarket.Exchange.Api')
-    proc_man.spawn_dotnet('company.api', 'StockMarket.Company.Api')
-    proc_man.spawn_dotnet('listing.api', 'StockMarket.Listing.Api')
-    proc_man.spawn_dotnet('gateway.api', 'StockMarket.Gateway.Api')
+    proc_man.spawn_dotnet('auth.api', 'src/StockMarket.Auth.Api')
+    proc_man.spawn_dotnet('sector.api', 'src/StockMarket.Sector.Api')
+    proc_man.spawn_dotnet('exchange.api', 'src/StockMarket.Exchange.Api')
+    proc_man.spawn_dotnet('company.api', 'src/StockMarket.Company.Api')
+    proc_man.spawn_dotnet('listing.api', 'src/StockMarket.Listing.Api')
+    # proc_man.spawn_dotnet('gateway.api', 'src/StockMarket.Gateway.Api')
     
     proc_man.poll()
 

@@ -1,0 +1,26 @@
+.title {
+    padding-top: 10px;
+    padding-left: 20px;
+}
+
+table {
+    margin: 0 auto;
+    width: 100%;
+}
+
+.mat-row .mat-cell{
+    border-bottom: 1px solid transparent;
+    border-top: 1px solid transparent;
+    cursor: pointer;
+}
+
+.mat-row:hover .mat-cell{
+    border-color: black;
+}
+
+#new-button {
+    margin-right: 20px;
+    float: right;
+    background-color: #db521c;
+    color: white;
+}

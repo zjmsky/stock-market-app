@@ -1,19 +1,16 @@
 # angular generated
-/StockMarket.WebClient/dist/
-/StockMarket.WebClient/node_modules/
+/src/StockMarket.WebClient/dist/
+/src/StockMarket.WebClient/node_modules/
 
 # dotnet generated
-/StockMarket.*.Api/bin/
-/StockMarket.*.Api/obj/
-/StockMarket.*.Api/Migrations/
-/StockMarket.*.Test/bin/
-/StockMarket.*.Test/obj/
+/src/StockMarket.*.Api/bin/
+/src/StockMarket.*.Api/obj/
+/src/StockMarket.*.Api/Migrations/
+/src/StockMarket.*.Test/bin/
+/src/StockMarket.*.Test/obj/
 
 # log files
 /.logs/
-
-# local database
-/.data/
 
 # editor files
 /**/.vscode/

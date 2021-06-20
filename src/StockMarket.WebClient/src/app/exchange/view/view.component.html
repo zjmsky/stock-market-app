@@ -1,0 +1,13 @@
+<h2 class="title">{{ exchange?.name }}</h2>
+
+<p class="content">{{ exchange?.description }}</p>
+
+<h4 class="section">Address</h4>
+<div class="section-content">
+    <p>{{ exchange?.address!.line1 }}</p>
+    <p>{{ exchange?.address!.line2 }}</p>
+    <p>{{ exchange?.address!.state }}</p>
+    <p>{{ exchange?.address!.country }}</p>
+    <p>Phone: {{ exchange?.address!.phoneNumber }}</p>
+    <p>Email: {{ exchange?.address!.email }}</p>
+</div>

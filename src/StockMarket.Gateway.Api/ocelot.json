@@ -1,0 +1,97 @@
+{
+    "GlobalConfiguration": {
+        "BaseUrl": "http://localhost:5000"
+    },
+    "Routes": [
+        {
+            "UpstreamPathTemplate": "/auth/{everything}",
+            "DownstreamPathTemplate": "/auth/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5010" }]
+        },
+        {
+            "UpstreamPathTemplate": "/users",
+            "DownstreamPathTemplate": "/users",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5010" }]
+        },
+        {
+            "UpstreamPathTemplate": "/users/{everything}",
+            "DownstreamPathTemplate": "/users/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5010" }]
+        },
+        {
+            "UpstreamPathTemplate": "/exchanges",
+            "DownstreamPathTemplate": "/exchanges",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5011" }]
+        },
+        {
+            "UpstreamPathTemplate": "/exchanges/{everything}",
+            "DownstreamPathTemplate": "/exchanges/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5011" }]
+        },
+        {
+            "UpstreamPathTemplate": "/sectors",
+            "DownstreamPathTemplate": "/sectors",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5012" }]
+        },
+        {
+            "UpstreamPathTemplate": "/sectors/{everything}",
+            "DownstreamPathTemplate": "/sectors/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5012" }]
+        },
+        {
+            "UpstreamPathTemplate": "/companies",
+            "DownstreamPathTemplate": "/companies",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5013" }]
+        },
+        {
+            "UpstreamPathTemplate": "/companies/{everything}",
+            "DownstreamPathTemplate": "/companies/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5013" }]
+        },
+        {
+            "UpstreamPathTemplate": "/listings",
+            "DownstreamPathTemplate": "/listings",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]
+        },
+        {
+            "UpstreamPathTemplate": "/listing/{everything}",
+            "DownstreamPathTemplate": "/listings/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]
+        },
+        {
+            "UpstreamPathTemplate": "/ipos",
+            "DownstreamPathTemplate": "/ipos",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]
+        },
+        {
+            "UpstreamPathTemplate": "/ipos/{everything}",
+            "DownstreamPathTemplate": "/ipos/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]
+        },
+        {
+            "UpstreamPathTemplate": "/prices",
+            "DownstreamPathTemplate": "/prices",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]
+        },
+        {
+            "UpstreamPathTemplate": "/prices/{everything}",
+            "DownstreamPathTemplate": "/prices/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [{ "Host": "localhost", "Port": "5014" }]
+        }
+    ]
+}

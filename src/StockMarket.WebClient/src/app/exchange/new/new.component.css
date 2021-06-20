@@ -1,0 +1,11 @@
+.title {
+    margin: 20px 10px;
+}
+
+mat-form-field {
+    float: left;
+    display: block;
+    margin: -5px 0px;
+    padding: 0px 50% 0px 0px;
+    width: 100%;
+}

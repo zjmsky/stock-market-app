@@ -6,6 +6,7 @@ controllers
 -----------
 - "Controller" suffix required
 - method names the same as corresponding http method
+- should have plural nouns (no verbs)
 - can perform only basic parameter validations
 - can transform data types to / from services
 - POST to create resources
